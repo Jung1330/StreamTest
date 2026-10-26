@@ -38,11 +38,8 @@ jobs:
       - name: JDK 17 Ayarla
         uses: actions/setup-java@v4.6.0
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: 17
-
-      - name: Android SDK Ayarla
-        uses: android-actions/setup-android@v3.2.2
 
       - name: Eklentileri Derle
         run: |
