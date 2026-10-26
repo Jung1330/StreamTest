@@ -12,6 +12,19 @@ open class TauVideo : ExtractorApi() {
     override val mainUrl         = "https://tau-video.xyz"
     override val requiresReferer = true
 
+    private fun getQuality(name: String?): Int {
+        if (name == null) return Qualities.Unknown.value
+        val lower = name.lowercase()
+        return when {
+            lower.contains("2160") || lower.contains("4k") -> Qualities.P2160.value
+            lower.contains("1080") -> Qualities.P1080.value
+            lower.contains("720") -> Qualities.P720.value
+            lower.contains("480") -> Qualities.P480.value
+            lower.contains("360") -> Qualities.P360.value
+            else -> Qualities.Unknown.value
+        }
+    }
+
     override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit) {
         val extRef   = referer ?: ""
         val videoKey = url.split("/").last().substringBefore("?").substringBefore("#")
@@ -27,8 +40,8 @@ open class TauVideo : ExtractorApi() {
                     name    = this.name,
                     url     = video.url,
                     referer = extRef,
-                    quality = getQualityFromName(video.label),
-                    type    = INFER_TYPE
+                    quality = getQuality(video.label),
+                    type    = ExtractorLinkType.VIDEO
                 )
             )
         }
