@@ -1,42 +1,91 @@
 [
     {
-        "name": "AnimeciX",
-        "internalName": "AnimeciX",
-        "version": 8,
+        "iconUrl": "https://www.google.com/s2/favicons?domain=animecix.tv&sz=%size%",
+        "fileHash": "sha256-62adf0346a5b6ec6f31eb1ad31bbe77c0760cd4745ceb03f78bd621dc6bf060c",
         "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 23510,
         "status": 1,
         "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
         "tvTypes": [
             "Anime"
         ],
-        "iconUrl": "https://www.google.com/s2/favicons?domain=animecix.tv&sz=%size%",
-        "authors": [
-            "StreamTest",
-            "AI-Assistant",
-            "keyiflerolsun"
-        ],
-        "description": "StreamTest - AnimeciX Güncel Eklentisi (AI ile dinamik X-E-H şifreleme ve tau-video desteği eklenmiştir).",
-        "url": "https://raw.githubusercontent.com/<SENIN_GITHUB_ADIN>/StreamTest/builds/AnimeciX.cs3",
-        "repositoryUrl": "https://github.com/<SENIN_GITHUB_ADIN>/StreamTest"
+        "version": 8,
+        "internalName": "AnimeciX",
+        "description": "StreamTest - AnimeciX G\u00fcncel Eklentisi (AI ile dinamik X-E-H \u015fifreleme ve tau-video deste\u011fi eklenmi\u015ftir).",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/AnimeciX.cs3",
+        "name": "AnimeciX"
     },
     {
-        "name": "TurkAnime",
-        "internalName": "TurkAnime",
-        "version": 2,
+        "iconUrl": "https://www.google.com/s2/favicons?domain=diziwatch.org&sz=%size%",
+        "fileHash": "sha256-1f2d57008ee7e5b171ea7e7d8595dcf2f73ac060728740c8889e851c60d803f5",
         "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 14097,
         "status": 1,
         "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "Anime",
+            "TvSeries"
+        ],
+        "version": 1,
+        "internalName": "Diziwatch",
+        "description": "StreamTest - Diziwatch G\u00fcncel Anime & Dizi Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Diziwatch.cs3",
+        "name": "Diziwatch"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=tranimeizle.live&sz=%size%",
+        "fileHash": "sha256-73ca3aacb050d549cd81c09fa24d3ab292168c3ae960f3591ec594587e9e0827",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 11902,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
         "tvTypes": [
             "Anime"
         ],
+        "version": 1,
+        "internalName": "TRAnimeIzle",
+        "description": "StreamTest - TRAnime\u0130zle G\u00fcncel Anime Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/TRAnimeIzle.cs3",
+        "name": "TRAnimeIzle"
+    },
+    {
         "iconUrl": "https://www.google.com/s2/favicons?domain=www.turkanime.co&sz=%size%",
+        "fileHash": "sha256-1a02de30df6e75b60f61073e0d16731505d2d2d07d282b2916e0efcde56e5a6d",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 15484,
+        "status": 1,
+        "language": "tr",
         "authors": [
+            "Jung1330",
             "StreamTest",
-            "AI-Assistant",
-            "keyiflerolsun"
+            "AI-Assistant"
         ],
-        "description": "StreamTest - TurkAnime Eklentisi (AI Destekli Olarak Güncellenmiştir).",
-        "url": "https://raw.githubusercontent.com/<SENIN_GITHUB_ADIN>/StreamTest/builds/TurkAnime.cs3",
-        "repositoryUrl": "https://github.com/<SENIN_GITHUB_ADIN>/StreamTest"
+        "tvTypes": [
+            "Anime"
+        ],
+        "version": 2,
+        "internalName": "TurkAnime",
+        "description": "StreamTest - TurkAnime Eklentisi (AI Destekli Olarak G\u00fcncellenmi\u015ftir).",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/TurkAnime.cs3",
+        "name": "TurkAnime"
     }
 ]
