@@ -129,13 +129,15 @@ class TRAnimeIzle : MainAPI() {
         val videoSrc = fixUrlNull(doc.selectFirst("video source")?.attr("src"))
         if (videoSrc != null) {
             callback.invoke(
-                ExtractorLink(
+                newExtractorLink(
                     source  = this.name,
                     name    = this.name,
                     url     = videoSrc,
-                    referer = "${mainUrl}/",
-                    quality = Qualities.P1080.value
-                )
+                    type    = ExtractorLinkType.VIDEO
+                ) {
+                    this.referer = "${mainUrl}/"
+                    this.quality = Qualities.P1080.value
+                }
             )
             found = true
         }
