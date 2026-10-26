@@ -1,0 +1,8 @@
+{
+    "name": "StreamTest",
+    "description": "StreamTest - AnimeciX & TurkAnime Eklentileri (AI / Yapay Zeka Destekli Olarak Güncellenmiştir)",
+    "manifestVersion": 1,
+    "pluginLists": [
+      "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/plugins.json"
+    ]
+}
