@@ -45,6 +45,28 @@
         "name": "Diziwatch"
     },
     {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=diziyou.one&sz=%size%",
+        "fileHash": "sha256-3694c406689eb2358b35f914a570c263b76c4e2924b1a98a4146e14143a68640",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 13259,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "TvSeries"
+        ],
+        "version": 1,
+        "internalName": "Diziyou",
+        "description": "StreamTest - Diziyou Yabanc\u0131 Dizi Eklentisi (do\u011frudan HLS oynatma).",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Diziyou.cs3",
+        "name": "Diziyou"
+    },
+    {
         "iconUrl": "https://www.google.com/s2/favicons?domain=dramadizilerim.com&sz=%size%",
         "fileHash": "sha256-4745aba78a739979c4cffc0b50ebf315eecb5ceb512e51a323ae5f6d512592d9",
         "apiVersion": 1,
