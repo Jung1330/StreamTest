@@ -90,10 +90,10 @@
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmcehennemi.nl&sz=%size%",
-        "fileHash": "sha256-32729034d5f34911d3fa14133ba9bd873eeb953858c296c609405d04c4ae29ba",
+        "fileHash": "sha256-927e7374ac90664bbdb944f06203bd05ed60e43693dd338d19f5589560979cad",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 17716,
+        "fileSize": 23597,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -104,9 +104,9 @@
         "tvTypes": [
             "Movie"
         ],
-        "version": 2,
+        "version": 3,
         "internalName": "Hdfilmcehennemi",
-        "description": "StreamTest - HDFilmCehennemi G\u00fcncel Film Eklentisi (site i\u00e7i arama + do\u011frudan HLS ve altyaz\u0131 deste\u011fi).",
+        "description": "StreamTest - HDFilmCehennemi Film & Dizi Eklentisi (site i\u00e7i arama, HLS, altyaz\u0131 ve rplayer deste\u011fi).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Hdfilmcehennemi.cs3",
         "name": "Hdfilmcehennemi"
     },
