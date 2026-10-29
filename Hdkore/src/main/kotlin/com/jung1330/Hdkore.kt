@@ -127,22 +127,15 @@ class Hdkore : MainAPI() {
         val episode = epRegex.find(data)?.groupValues?.get(1) ?: "1"
         val apiUrl  = "$mainUrl/api/api-player/episode-url/$entId/$episode?pt=${URLEncoder.encode(pt, "UTF-8")}"
 
-        fun fetchApi(url: String): String? = try {
-            app.get(
-                url,
-                headers = mapOf(
-                    "X-Requested-With" to "XMLHttpRequest",
-                    "Referer"          to data
-                )
-            ).text
-        } catch (t: Throwable) {
-            Log.e("HDKore", "Oynatıcı API hatası: ${t.message}")
-            null
-        }
+        val apiHeaders = mapOf(
+            "X-Requested-With" to "XMLHttpRequest",
+            "Referer"          to data
+        )
 
         // İlk deneme başarısızsa sitenin "fail kilidi"ni atlayarak bir kez daha dene
-        val json = fetchApi(apiUrl)?.takeIf { it.contains("video_url") }
-            ?: fetchApi("$apiUrl&force=1")
+        val firstJson = runCatching { app.get(apiUrl, headers = apiHeaders).text }.getOrNull()
+        val json = firstJson?.takeIf { it.contains("video_url") }
+            ?: runCatching { app.get("$apiUrl&force=1", headers = apiHeaders).text }.getOrNull()
 
         val obj = json?.let { runCatching { JSONObject(it) }.getOrNull() }
         val videoUrl = obj?.optString("video_url").orEmpty()
