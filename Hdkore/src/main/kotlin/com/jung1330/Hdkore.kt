@@ -133,9 +133,23 @@ class Hdkore : MainAPI() {
         )
 
         // İlk deneme başarısızsa sitenin "fail kilidi"ni atlayarak bir kez daha dene
-        val firstJson = runCatching { app.get(apiUrl, headers = apiHeaders).text }.getOrNull()
-        val json = firstJson?.takeIf { it.contains("video_url") }
-            ?: runCatching { app.get("$apiUrl&force=1", headers = apiHeaders).text }.getOrNull()
+        val firstJson: String? = try {
+            app.get(apiUrl, headers = apiHeaders).text
+        } catch (t: Throwable) {
+            Log.e("HDKore", "Oynatıcı API hatası: ${t.message}")
+            null
+        }
+
+        val json: String? = if (firstJson != null && firstJson.contains("video_url")) {
+            firstJson
+        } else {
+            try {
+                app.get("$apiUrl&force=1", headers = apiHeaders).text
+            } catch (t: Throwable) {
+                Log.e("HDKore", "Oynatıcı API hatası (force): ${t.message}")
+                firstJson
+            }
+        }
 
         val obj = json?.let { runCatching { JSONObject(it) }.getOrNull() }
         val videoUrl = obj?.optString("video_url").orEmpty()
