@@ -21,6 +21,12 @@ Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi s
   * "Son Eklenenler", "Popüler Animeler" ve "Son Bölümler" kategorileri (sayfalama destekli).
   * Güncel ve popüler seriler için alternatif Türkçe anime akışı.
   * Çoklu oynatıcı (iframe, video etiketi, JSON kaynak listesi) taraması.
+* **HDFilmCehennemi (`hdfilmcehennemi.nl`):**
+  * Film kategorisi, DuckDuckGo destekli arama.
+  * Kendi oynatıcısındaki şifreli yayın adresini çözer; HLS kaliteleri (1080/720/480) ve altyazılar.
+* **FilmMakinesi (`filmmakinesi.to`):**
+  * Sayfalanan film listesi, site içi arama.
+  * Şifreli oynatıcı çözümü, HLS kaliteleri ve altyazılar.
 
 ---
 
