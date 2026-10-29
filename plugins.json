@@ -112,10 +112,10 @@
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=filmmakinesi.to&sz=%size%",
-        "fileHash": "sha256-9fbfba52dd81fa748a1cec6cab2743751bb796aaa13ae82f730817a73f1561a0",
+        "fileHash": "sha256-2eb69d56df445b4911521c4b8e2f992fbba85842273920027c05a9db4fb5b941",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 16454,
+        "fileSize": 19408,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -126,9 +126,9 @@
         "tvTypes": [
             "Movie"
         ],
-        "version": 2,
+        "version": 3,
         "internalName": "Filmmakinesi",
-        "description": "StreamTest - FilmMakinesi G\u00fcncel Film Eklentisi (do\u011frudan HLS + altyaz\u0131 deste\u011fi).",
+        "description": "StreamTest - FilmMakinesi Film & Dizi Eklentisi (HLS + altyaz\u0131).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Filmmakinesi.cs3",
         "name": "Filmmakinesi"
     },
