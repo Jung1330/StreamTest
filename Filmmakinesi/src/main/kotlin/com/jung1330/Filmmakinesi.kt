@@ -15,7 +15,7 @@ class Filmmakinesi : MainAPI() {
     override val hasMainPage          = true
     override var lang                 = "tr"
     override val hasQuickSearch       = false
-    override val supportedTypes       = setOf(TvType.Movie)
+    override val supportedTypes       = setOf(TvType.Movie, TvType.TvSeries)
 
     override val mainPage = mainPageOf(
         "$mainUrl/filmler-1/" to "Filmler"
@@ -40,15 +40,18 @@ class Filmmakinesi : MainAPI() {
 
         val items = doc.select("a.item[data-title]").mapNotNull { a ->
             val href = fixUrlNull(a.attr("href")) ?: return@mapNotNull null
-            if (!href.contains("/film/")) return@mapNotNull null
+            if (!href.contains("/film/") && !href.contains("/dizi/")) return@mapNotNull null
 
             val title = a.attr("data-title").trim()
             if (title.isBlank()) return@mapNotNull null
 
             val poster = fixUrlNull(a.selectFirst("img")?.attr("src"))
+            val isSeries = href.contains("/dizi/")
 
-            newMovieSearchResponse(title, href, TvType.Movie) {
-                this.posterUrl = poster
+            if (isSeries) {
+                newTvSeriesSearchResponse(title, href, TvType.TvSeries) { this.posterUrl = poster }
+            } else {
+                newMovieSearchResponse(title, href, TvType.Movie) { this.posterUrl = poster }
             }
         }.distinctBy { it.url }
 
@@ -71,9 +74,12 @@ class Filmmakinesi : MainAPI() {
             if (title.isBlank()) return@mapNotNull null
 
             val poster = fixUrlNull(a.selectFirst("img")?.attr("src"))
+            val isSeries = href.contains("/dizi/")
 
-            newMovieSearchResponse(title, href, TvType.Movie) {
-                this.posterUrl = poster
+            if (isSeries) {
+                newTvSeriesSearchResponse(title, href, TvType.TvSeries) { this.posterUrl = poster }
+            } else {
+                newMovieSearchResponse(title, href, TvType.Movie) { this.posterUrl = poster }
             }
         }.distinctBy { it.url }
     }
@@ -90,6 +96,30 @@ class Filmmakinesi : MainAPI() {
         val plot   = doc.selectFirst("meta[property='og:description']")?.attr("content")?.trim()
         val year   = Regex("""\b(19|20)\d{2}\b""").find(title)?.value?.toIntOrNull()
         val tags   = doc.select("a[href*='/tur/']").map { it.text().trim() }.filter { it.isNotEmpty() }.distinct()
+
+        if (url.contains("/dizi/")) {
+            val episodes = doc.select("a[href*='sezon-'][href*='bolum-']").mapNotNull { a ->
+                val href = fixUrlNull(a.attr("href")) ?: return@mapNotNull null
+                val m = Regex("""sezon-(\d+)/bolum-(\d+)""").find(href) ?: return@mapNotNull null
+                val s = m.groupValues[1].toIntOrNull() ?: return@mapNotNull null
+                val e = m.groupValues[2].toIntOrNull() ?: return@mapNotNull null
+
+                newEpisode(href) {
+                    this.name    = "$s. Sezon $e. Bölüm"
+                    this.season  = s
+                    this.episode = e
+                }
+            }.distinctBy { it.data }.sortedWith(compareBy({ it.season }, { it.episode }))
+
+            if (episodes.isNotEmpty()) {
+                return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
+                    this.posterUrl = poster
+                    this.plot      = plot
+                    this.year      = year
+                    this.tags      = tags
+                }
+            }
+        }
 
         val embed = doc.select("iframe").asSequence()
             .mapNotNull { fixUrlNull(it.attr("data-src").ifBlank { it.attr("src") }) }
@@ -204,7 +234,13 @@ class Filmmakinesi : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
-        val embedUrl = data
+        // Dizi bölümü geldiyse oynatıcı iframe'ini bul
+        val embedUrl: String = if (data.contains("/sezon-") && data.contains("/bolum-")) {
+            val page = runCatching { app.get(data).document }.getOrNull() ?: return false
+            page.select("iframe").asSequence()
+                .mapNotNull { fixUrlNull(it.attr("data-src").ifBlank { it.attr("src") }) }
+                .firstOrNull { it.contains("/video/embed/") } ?: return false
+        } else data
 
         val html = try {
             app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).text
