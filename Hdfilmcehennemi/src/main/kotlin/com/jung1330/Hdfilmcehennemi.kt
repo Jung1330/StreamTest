@@ -6,6 +6,8 @@ import android.util.Base64
 import android.util.Log
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
+import org.json.JSONObject
+import org.jsoup.Jsoup
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -50,7 +52,48 @@ class Hdfilmcehennemi : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        // Sitenin araması JavaScript ile çalışıyor; DuckDuckGo site araması kullanılıyor.
+        val encoded = URLEncoder.encode(query.trim(), "UTF-8")
+
+        // Sitenin kendi JSON arama servisi (X-Requested-With: fetch başlığı gerekli)
+        val json = try {
+            app.get(
+                "$mainUrl/search?q=$encoded",
+                headers = mapOf("X-Requested-With" to "fetch")
+            ).text
+        } catch (t: Throwable) {
+            return searchWithDuckDuckGo(query)
+        }
+
+        val results = runCatching { JSONObject(json).optJSONArray("results") }.getOrNull()
+            ?: return searchWithDuckDuckGo(query)
+
+        val out = mutableListOf<SearchResponse>()
+        for (i in 0 until results.length()) {
+            val html = results.optString(i)
+            if (html.isBlank()) continue
+
+            val el = runCatching { Jsoup.parse(html).selectFirst("a.search-result") }.getOrNull() ?: continue
+            val href = fixUrlNull(el.attr("href")) ?: continue
+            val title = el.selectFirst("h4.title")?.text()?.trim()
+                ?: el.selectFirst("img")?.attr("alt")?.trim()
+                ?: continue
+            if (title.isBlank()) continue
+
+            val poster = fixUrlNull(el.selectFirst("img")?.attr("src"))
+            val isSeries = el.selectFirst("span.type")?.text()?.contains("Dizi", true) == true
+            val type = if (isSeries) TvType.TvSeries else TvType.Movie
+
+            if (isSeries) {
+                out.add(newTvSeriesSearchResponse(title, href, type) { this.posterUrl = poster })
+            } else {
+                out.add(newMovieSearchResponse(title, href, type) { this.posterUrl = poster })
+            }
+        }
+        return out.distinctBy { it.url }
+    }
+
+    /** Arama servisi bozulursa DuckDuckGo site aramasına düşer. */
+    private suspend fun searchWithDuckDuckGo(query: String): List<SearchResponse> {
         val q = URLEncoder.encode("site:hdfilmcehennemi.nl $query", "UTF-8")
         val doc = try {
             app.get("https://html.duckduckgo.com/html/?q=$q").document

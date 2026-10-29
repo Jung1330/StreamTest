@@ -1,9 +1,9 @@
-version = 1
+version = 2
 
 cloudstream {
     authors     = listOf("Jung1330", "StreamTest", "AI-Assistant")
     language    = "tr"
-    description = "StreamTest - HDFilmCehennemi Güncel Film Eklentisi (doğrudan HLS + altyazı desteği)."
+    description = "StreamTest - HDFilmCehennemi Güncel Film Eklentisi (site içi arama + doğrudan HLS ve altyazı desteği)."
 
     /**
      * Status int as the following:
