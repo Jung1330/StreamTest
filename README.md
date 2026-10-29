@@ -15,12 +15,12 @@ Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi s
   * CloudStream'in yerel **Tüm Sezonu İndir (Download Season)** özelliğiyle tam uyumlu.
 * **Diziwatch (`diziwatch.org`):**
   * Hızlı ve temiz REST arama API'si entegrasyonu.
-  * Voe, Vidmoly, Sibnet, Mail.ru, OK.ru çoklu oynatıcı desteği ile 1080p Full HD yayın.
-  * Sezon ve bölüm listeleme.
+  * Voe, Sibnet, Mail.ru, OK.ru, AnizmPlayer çoklu oynatıcı desteği ile 1080p Full HD yayın.
+  * Sayfalanan "Anime Arşivi" ve "Son Bölümler" kategorileri, sezon/bölüm listeleme.
 * **TRAnimeİzle (`tranimeizle.live`):**
+  * "Son Eklenenler", "Popüler Animeler" ve "Son Bölümler" kategorileri (sayfalama destekli).
   * Güncel ve popüler seriler için alternatif Türkçe anime akışı.
-* **TurkAnime:**
-  * Eski Türkçe anime arşivi modülü (Score API güncellemesi yapılmıştır).
+  * Çoklu oynatıcı (iframe, video etiketi, JSON kaynak listesi) taraması.
 
 ---
 

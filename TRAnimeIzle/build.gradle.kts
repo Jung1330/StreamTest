@@ -1,9 +1,9 @@
-version = 1
+version = 2
 
 cloudstream {
     authors     = listOf("Jung1330", "StreamTest", "AI-Assistant")
     language    = "tr"
-    description = "StreamTest - TRAnimeİzle Güncel Anime Eklentisi."
+    description = "StreamTest - TRAnimeİzle Güncel Anime Eklentisi (kategoriler, arama ve oynatıcı taraması düzeltildi)."
     status      = 1
     tvTypes     = listOf("Anime")
     iconUrl     = "https://www.google.com/s2/favicons?domain=tranimeizle.live&sz=%size%"
