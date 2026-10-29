@@ -48,9 +48,21 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/src
           chmod +x gradlew
-          ./gradlew make makePluginsJson --stacktrace
+          set -o pipefail
+          ./gradlew make makePluginsJson --stacktrace 2>&1 | tee /tmp/build.log
           find . -name "*.cs3" -exec cp {} $GITHUB_WORKSPACE/builds/ \;
           cp build/plugins.json $GITHUB_WORKSPACE/builds/
+
+      - name: Derleme Logunu Yayinla
+        if: failure()
+        run: |
+          cp /tmp/build.log $GITHUB_WORKSPACE/builds/build-error.log || true
+          cd $GITHUB_WORKSPACE/builds
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add build-error.log
+          git commit -m "Derleme hatasi logu: $GITHUB_SHA" || exit 0
+          git push origin builds
 
       - name: Derlemeleri Yükle
         run: |

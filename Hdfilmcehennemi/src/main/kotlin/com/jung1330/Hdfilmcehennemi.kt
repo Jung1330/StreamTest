@@ -188,7 +188,7 @@ class Hdfilmcehennemi : MainAPI() {
         val embedUrl = data
 
         val html = try {
-            app.get(embedUrl, referer = "$mainUrl/").text
+            app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).text
         } catch (t: Throwable) {
             return false
         }
