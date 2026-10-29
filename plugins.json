@@ -45,6 +45,28 @@
         "name": "Diziwatch"
     },
     {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=dramadizilerim.com&sz=%size%",
+        "fileHash": "sha256-1a99720311a3ed4a527407516aa6151062d593567f4024b68c70d001638e24ea",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 13417,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "TvSeries"
+        ],
+        "version": 1,
+        "internalName": "Dramadizilerim",
+        "description": "StreamTest - Drama Dizilerim (dikey mini diziler) eklentisi: HLS oynatma deste\u011fi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dramadizilerim.cs3",
+        "name": "Dramadizilerim"
+    },
+    {
         "iconUrl": "https://www.google.com/s2/favicons?domain=filmmakinesi.to&sz=%size%",
         "fileHash": "sha256-52b96850f14bb89724ec100bafbd8ac3c842e36af68daa0d98c9d35ebcc1dd23",
         "apiVersion": 1,
