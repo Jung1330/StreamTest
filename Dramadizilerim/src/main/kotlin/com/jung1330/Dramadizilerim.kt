@@ -118,29 +118,48 @@ class Dramadizilerim : MainAPI() {
             return false
         }
 
-        val iframe = doc.select("iframe[src*=embed]").firstOrNull()?.attr("src")
-            ?: doc.selectFirst("iframe")?.attr("src")
-            ?: return false
+        // Oynatıcı iframe'leri: embed içerenler önce denenir
+        val iframes = doc.select("iframe[src]")
+            .mapNotNull { fixUrlNull(it.attr("src")) }
+            .sortedByDescending { it.contains("embed", true) }
 
-        val embedUrl = fixUrl(iframe).replace("&amp;", "&")
+        var streamUrl: String? = null
+        var embedUrl          = ""
 
-        val embedHtml = try {
-            app.get(embedUrl, headers = mapOf("Referer" to data)).text
-        } catch (t: Throwable) {
-            Log.e("DramaDizilerim", "Oynatıcı açılamadı: ${t.message}")
-            return false
+        for (iframe in iframes) {
+            embedUrl = iframe.replace("&amp;", "&")
+
+            val embedHtml = try {
+                app.get(embedUrl, headers = mapOf("Referer" to data)).text
+            } catch (t: Throwable) {
+                Log.e("DramaDizilerim", "Oynatıcı açılamadı: ${t.message}")
+                continue
+            }
+
+            val found = Regex("""let\s+source\s*=\s*"([^"]+)"""").find(embedHtml)?.groupValues?.get(1)
+                ?: Regex("""https?://[^"'\\\s]+\.m3u8[^"'\\\s]*""").find(embedHtml)?.value
+
+            if (!found.isNullOrBlank()) {
+                streamUrl = found
+                break
+            }
         }
 
-        val streamUrl = Regex("""let source\s*=\s*"([^"]+)"""").find(embedHtml)?.groupValues?.get(1)
-            ?: Regex("""https?://[^"'\\\s]+\.m3u8[^"'\\\s]*""").find(embedHtml)?.value
-
+        // Oynatıcı bulunamadıysa sayfanın kendisinde m3u8 ara
         if (streamUrl.isNullOrBlank()) {
+            streamUrl = Regex("""https?://[^"'\\\s]+\.m3u8[^"'\\\s]*""").find(doc.html())?.value
+        }
+
+        val finalUrl = streamUrl
+        if (finalUrl.isNullOrBlank()) {
             Log.e("DramaDizilerim", "Yayın adresi bulunamadı: $data")
             return false
         }
 
+        val referer = embedUrl.ifBlank { "$mainUrl/" }
+
         val links = try {
-            M3u8Helper.generateM3u8(this.name, streamUrl, embedUrl)
+            M3u8Helper.generateM3u8(this.name, finalUrl, referer)
         } catch (t: Throwable) {
             emptyList()
         }
@@ -154,7 +173,7 @@ class Dramadizilerim : MainAPI() {
             newExtractorLink(
                 source = this.name,
                 name   = this.name,
-                url    = streamUrl,
+                url    = finalUrl,
                 type   = ExtractorLinkType.M3U8
             ) {
                 this.referer = "$mainUrl/"
