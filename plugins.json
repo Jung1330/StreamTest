@@ -23,10 +23,10 @@
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=diziwatch.org&sz=%size%",
-        "fileHash": "sha256-1f2d57008ee7e5b171ea7e7d8595dcf2f73ac060728740c8889e851c60d803f5",
+        "fileHash": "sha256-1c4d8c1eed6cd9156acc522fe40362af58c293a8105ae42ac570c9cb5bdb6599",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 14097,
+        "fileSize": 15330,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -38,40 +38,18 @@
             "Anime",
             "TvSeries"
         ],
-        "version": 1,
+        "version": 2,
         "internalName": "Diziwatch",
-        "description": "StreamTest - Diziwatch G\u00fcncel Anime & Dizi Eklentisi.",
+        "description": "StreamTest - Diziwatch G\u00fcncel Anime & Dizi Eklentisi (sayfalama ve oynat\u0131c\u0131 taramas\u0131 d\u00fczeltildi).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Diziwatch.cs3",
         "name": "Diziwatch"
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=tranimeizle.live&sz=%size%",
-        "fileHash": "sha256-73ca3aacb050d549cd81c09fa24d3ab292168c3ae960f3591ec594587e9e0827",
+        "fileHash": "sha256-8cfa3b9f77daf4724c18e31762a9572da5bf4590af4cb23540dfaa4dd9f094a6",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 11902,
-        "status": 1,
-        "language": "tr",
-        "authors": [
-            "Jung1330",
-            "StreamTest",
-            "AI-Assistant"
-        ],
-        "tvTypes": [
-            "Anime"
-        ],
-        "version": 1,
-        "internalName": "TRAnimeIzle",
-        "description": "StreamTest - TRAnime\u0130zle G\u00fcncel Anime Eklentisi.",
-        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/TRAnimeIzle.cs3",
-        "name": "TRAnimeIzle"
-    },
-    {
-        "iconUrl": "https://www.google.com/s2/favicons?domain=www.turkanime.co&sz=%size%",
-        "fileHash": "sha256-1a02de30df6e75b60f61073e0d16731505d2d2d07d282b2916e0efcde56e5a6d",
-        "apiVersion": 1,
-        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 15484,
+        "fileSize": 14621,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -83,9 +61,9 @@
             "Anime"
         ],
         "version": 2,
-        "internalName": "TurkAnime",
-        "description": "StreamTest - TurkAnime Eklentisi (AI Destekli Olarak G\u00fcncellenmi\u015ftir).",
-        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/TurkAnime.cs3",
-        "name": "TurkAnime"
+        "internalName": "TRAnimeIzle",
+        "description": "StreamTest - TRAnime\u0130zle G\u00fcncel Anime Eklentisi (kategoriler, arama ve oynat\u0131c\u0131 taramas\u0131 d\u00fczeltildi).",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/TRAnimeIzle.cs3",
+        "name": "TRAnimeIzle"
     }
 ]
