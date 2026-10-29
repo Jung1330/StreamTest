@@ -280,7 +280,7 @@ class Hdfilmcehennemi : MainAPI() {
         val unpacked = runCatching { getAndUnpack(script) }.getOrNull() ?: script
         val payload  = rplayerPayload.find(unpacked)?.groupValues?.get(1) ?: return false
 
-        val streamUrl = runCatching { decodeRplayer(payload) }.getOrNull()
+        val streamUrl = runCatching { decodePack(payload, "", "^") }.getOrNull()
         if (streamUrl.isNullOrBlank() || !streamUrl.startsWith("http")) {
             Log.e("HDFilmCehennemi", "rplayer çözülemedi: $url")
             return false
@@ -311,15 +311,31 @@ class Hdfilmcehennemi : MainAPI() {
         return true
     }
 
+    /** Embed sayfasındaki paketlenmiş/obfuscate edilmiş yayın adresini çözer. */
+    private fun resolvePacked(html: String, host: String): String? {
+        fun parse(src: String): String? {
+            val varName = Regex("""sources\s*:\s*\[\{file:\s*(\w+)""").find(src)?.groupValues?.get(1) ?: return null
+            val call = Regex("""var\s+""" + Regex.escape(varName) + """\s*=\s*\w+\("([^"]+)"\.split\("([^"]+)"\)\)""")
+                .find(src) ?: return null
+            return decodePack(call.groupValues[1], host, call.groupValues[2])
+        }
+
+        parse(html)?.let { return it }
+
+        val packed = Regex("""(?s)eval\(function\(p,a,c,k,e,[dr]\).*?""").find(html)?.value ?: return null
+        val unpacked = runCatching { getAndUnpack(packed) }.getOrNull() ?: return null
+        return parse(unpacked)
+    }
+
     /** rplayer decoder'ı (hostname kullanmayan varyant). */
-    private fun decodeRplayer(payload: String): String {
-        val parts = payload.split("^").toMutableList()
+    private fun decodePack(payload: String, host: String, sep: String): String {
+        val parts = payload.split(sep).toMutableList()
         val len   = parts.size - 2
         val c78   = len % 7
         val ggn   = 8 + (len % 5)
 
         val kr3   = parts.removeAt(ggn)
-        val key   = parts.removeAt(c78)
+        val key   = parts.removeAt(c78) + host
         var text  = parts.joinToString("")
 
         if (kr3.length > 2048) text = text.reversed()
@@ -409,7 +425,7 @@ class Hdfilmcehennemi : MainAPI() {
 
         val streamUrl = encodedRegex.find(html)?.let { match ->
             runCatching { decodeSource(match.groupValues[1], host) }.getOrNull()
-        } ?: contentRegex.find(html)?.groupValues?.get(1)
+        } ?: runCatching { resolvePacked(html, host) }.getOrNull()
 
         if (streamUrl.isNullOrBlank()) {
             Log.e("HDFilmCehennemi", "Yayın adresi çözülemedi: $embedUrl")

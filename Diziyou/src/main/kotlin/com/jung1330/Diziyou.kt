@@ -34,16 +34,23 @@ class Diziyou : MainAPI() {
 
         doc.select("a[href]").forEach { a ->
             val href = fixUrlNull(a.attr("href")) ?: return@forEach
-            val slug = seriesRegex.find(href)?.groupValues?.get(1) ?: return@forEach
+            if (!href.startsWith("$mainUrl/")) return@forEach
+
+            val path = href.removePrefix("$mainUrl/").trimEnd('/')
+            if (!path.matches(Regex("""^[a-z0-9\-]+$"""))) return@forEach
+
+            // Bölüm linkini diziye indir: scrubs-2-sezon-6-bolum -> scrubs
+            val slug = Regex("""^([a-z0-9\-]+?)-\d+-sezon-\d+-bolum$""")
+                .find(path)?.groupValues?.get(1) ?: path
             if (slug in reserved) return@forEach
 
-            val img   = a.selectFirst("img") ?: return@forEach
-            val title = img.attr("alt").trim().ifBlank { a.attr("title").trim() }
-            if (title.isBlank()) return@forEach
+            val title = a.attr("title").substringBefore(" izle").trim()
+                .ifBlank { slug.replace('-', ' ').replaceFirstChar { it.uppercase() } }
 
-            val poster = fixUrlNull(img.attr("src")) ?: fixUrlNull(img.attr("data-src"))
+            val poster = fixUrlNull(a.selectFirst("img")?.attr("src"))
+                ?.takeIf { !it.contains("/themes/") }
 
-            out.add(newTvSeriesSearchResponse(title, href, TvType.TvSeries) {
+            out.add(newTvSeriesSearchResponse(title, "$mainUrl/$slug/", TvType.TvSeries) {
                 this.posterUrl = poster
             })
         }
@@ -63,15 +70,21 @@ class Diziyou : MainAPI() {
         val out = mutableListOf<SearchResponse>()
         doc.select("a[href]").forEach { a ->
             val href = fixUrlNull(a.attr("href")) ?: return@forEach
-            val slug = seriesRegex.find(href)?.groupValues?.get(1) ?: return@forEach
+            if (!href.startsWith("$mainUrl/")) return@forEach
+
+            val path = href.removePrefix("$mainUrl/").trimEnd('/')
+            if (!path.matches(Regex("""^[a-z0-9\-]+$"""))) return@forEach
+
+            val slug = Regex("""^([a-z0-9\-]+?)-\d+-sezon-\d+-bolum$""")
+                .find(path)?.groupValues?.get(1) ?: path
             if (slug in reserved) return@forEach
 
-            val img   = a.selectFirst("img") ?: return@forEach
-            val title = img.attr("alt").trim().ifBlank { a.attr("title").trim() }
-            if (title.isBlank()) return@forEach
+            val title = a.attr("title").substringBefore(" izle").trim()
+                .ifBlank { slug.replace('-', ' ').replaceFirstChar { it.uppercase() } }
 
-            out.add(newTvSeriesSearchResponse(title, href, TvType.TvSeries) {
-                this.posterUrl = fixUrlNull(img.attr("src"))
+            out.add(newTvSeriesSearchResponse(title, "$mainUrl/$slug/", TvType.TvSeries) {
+                this.posterUrl = fixUrlNull(a.selectFirst("img")?.attr("src"))
+                    ?.takeIf { !it.contains("/themes/") }
             })
         }
         return out.distinctBy { it.url }

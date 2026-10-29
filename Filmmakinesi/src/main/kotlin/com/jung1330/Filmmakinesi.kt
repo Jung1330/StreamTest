@@ -114,8 +114,8 @@ class Filmmakinesi : MainAPI() {
     }
 
     /** Embed sayfasındaki obfuscate edilmiş yayın adresini çözer. */
-    private fun decodeSource(data: String, host: String): String {
-        val parts = data.split("^").toMutableList()
+    private fun decodeSource(data: String, host: String, sep: String = "^"): String {
+        val parts = data.split(sep).toMutableList()
         val len   = parts.size - 2
         val p7    = len % 7
         val um    = 8 + (len % 5)
@@ -187,6 +187,22 @@ class Filmmakinesi : MainAPI() {
         return String(bytes, Charsets.UTF_8)
     }
 
+    /** Yeni tip embed'ler: sources:[{file:VAR}] + var VAR=fn("payload".split(SEP)) */
+    private fun resolvePacked(html: String, host: String): String? {
+        fun parse(src: String): String? {
+            val varName = Regex("""sources\s*:\s*\[\{file:\s*(\w+)""").find(src)?.groupValues?.get(1) ?: return null
+            val call = Regex("""var\s+""" + Regex.escape(varName) + """\s*=\s*\w+\("([^"]+)"\.split\("([^"]+)"\)\)""")
+                .find(src) ?: return null
+            return decodeSource(call.groupValues[1], host, call.groupValues[2])
+        }
+
+        parse(html)?.let { return it }
+
+        val packed = Regex("""(?s)eval\(function\(p,a,c,k,e,[dr]\).*?""").find(html)?.value ?: return null
+        val unpacked = runCatching { getAndUnpack(packed) }.getOrNull() ?: return null
+        return parse(unpacked)
+    }
+
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val embedUrl = data
 
@@ -200,7 +216,7 @@ class Filmmakinesi : MainAPI() {
 
         val streamUrl = encodedRegex.find(html)?.let { match ->
             runCatching { decodeSource(match.groupValues[1], host) }.getOrNull()
-        } ?: contentRegex.find(html)?.groupValues?.get(1)
+        } ?: runCatching { resolvePacked(html, host) }.getOrNull()
 
         if (streamUrl.isNullOrBlank()) {
             Log.e("FilmMakinesi", "Yayın adresi çözülemedi: $embedUrl")
