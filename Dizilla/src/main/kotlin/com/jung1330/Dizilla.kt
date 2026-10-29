@@ -94,7 +94,7 @@ class Dizilla : MainAPI() {
                 this.season  = season
                 this.episode = episode
             }
-        }.distinctBy { it.data }.sortedWith(compareBy({ it.season }, { it.episode }))
+        }.distinctBy { it.data }.sortedWith(compareBy({ it.season }, { it.episode })).toList()
 
         return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
             this.posterUrl = poster
