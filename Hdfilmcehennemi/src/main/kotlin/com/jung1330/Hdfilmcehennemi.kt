@@ -22,11 +22,13 @@ class Hdfilmcehennemi : MainAPI() {
 
     override val mainPage = mainPageOf(
         "$mainUrl/category/film-izle-2/" to "Filmler",
-        "$mainUrl/yabancidiziizle-6/"    to "Diziler"
+        "$mainUrl/yabancidiziizle-10/"   to "Yabancı Diziler",
+        "$mainUrl/serifilmlerim-8/"      to "Seri Filmler"
     )
 
-    private val filmRegex        = Regex("""^https://www\.hdfilmcehennemi\.nl/[a-z0-9\-]+/$""")
-    private val episodeUrlRegex  = Regex("""^https://www\.hdfilmcehennemi\.nl/dizi/([^/]+)/sezon-\d+/bolum-\d+/$""")
+    private val filmRegex        = Regex("""^https://www\.hdfilmcehennemi\.nl/[a-z0-9\-]+/?$""")
+    private val seriesRegex      = Regex("""^https://www\.hdfilmcehennemi\.nl/dizi/([^/]+)/?$""")
+    private val episodeUrlRegex  = Regex("""^https://www\.hdfilmcehennemi\.nl/dizi/([^/]+)/sezon-\d+/bolum-\d+/?$""")
     private val packedRegex      = Regex("""(?s)eval\(function\(p,a,c,k,e,[dr]\)\{.*?\}\s*\('.*?',\s*\d+,\s*\d+,\s*'.*?'\.split\('\|'\)\s*(?:,\s*0\s*,\s*\{\s*\}\s*)?\)\)""")
     private val payloadCallRegex = Regex("""\("([^"]{20,})"\.split\("([^"]+)"\)\)""")
     private val directFileRegex  = Regex(""""?file"?\s*:\s*"(https?://[^"]+(?:\.m3u8|master\.txt)[^"]*)"""")
@@ -46,6 +48,7 @@ class Hdfilmcehennemi : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        if (page > 1) return newHomePageResponse(request.name, emptyList())
         val doc = app.get(request.data).document
 
         val items = doc.select("a.poster").mapNotNull { a ->
@@ -58,11 +61,18 @@ class Hdfilmcehennemi : MainAPI() {
             val poster = fixUrlNull(img?.attr("data-src"))
                 ?: fixUrlNull(img?.attr("src"))?.takeIf { !it.startsWith("data:") }
 
-            val seriesMatch = episodeUrlRegex.find(href)
+            val epMatch     = episodeUrlRegex.find(href)
+            val directMatch = seriesRegex.find(href)
             when {
-                seriesMatch != null -> newTvSeriesSearchResponse(
-                    title.substringBefore(" izle"),
-                    "$mainUrl/dizi/${seriesMatch.groupValues[1]}/",
+                epMatch != null -> newTvSeriesSearchResponse(
+                    title.substringBefore(" izle").trim(),
+                    "$mainUrl/dizi/${epMatch.groupValues[1]}/",
+                    TvType.TvSeries
+                ) { this.posterUrl = poster }
+
+                directMatch != null -> newTvSeriesSearchResponse(
+                    title.substringBefore(" izle").trim(),
+                    "$mainUrl/dizi/${directMatch.groupValues[1]}/",
                     TvType.TvSeries
                 ) { this.posterUrl = poster }
 

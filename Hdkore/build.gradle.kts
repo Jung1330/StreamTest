@@ -1,9 +1,9 @@
-version = 2
+version = 3
 
 cloudstream {
     authors     = listOf("Jung1330", "StreamTest", "AI-Assistant")
     language    = "tr"
-    description = "StreamTest - HDKore Güncel Kore/Çin Dizi Eklentisi (doğrudan mp4 + altyazı desteği)."
+    description = "StreamTest - HDKore Güncel Kore/Çin Dizi & Film Eklentisi (doğrudan 1080p MP4 + altyazı desteği)."
 
     /**
      * Status int as the following:
@@ -13,6 +13,6 @@ cloudstream {
      * 3: Beta only
     **/
     status  = 1
-    tvTypes = listOf("TvSeries")
+    tvTypes = listOf("TvSeries", "Movie")
     iconUrl = "https://www.google.com/s2/favicons?domain=hdkore1.com&sz=%size%"
 }

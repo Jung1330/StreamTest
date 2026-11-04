@@ -560,6 +560,43 @@ class Jetfilmizle : MainAPI() {
                 }
             }
 
+            embedUrl.contains("videopark.top/jdizi/", ignoreCase = true) -> {
+                val html = runCatching {
+                    app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).text
+                }.getOrNull() ?: return
+
+                val rawProxy = Regex("""rawProxyUrl\s*=\s*["']([^"']+)["']""")
+                    .find(html)?.groupValues?.get(1)?.replace("\\/", "/")?.trim()
+                    ?: return
+                val workerUrl = Regex("""workerUrl\s*=\s*["']([^"']+)["']""")
+                    .find(html)?.groupValues?.get(1)?.replace("\\/", "/")?.trimEnd('/')
+
+                val candidates = buildList {
+                    if (!workerUrl.isNullOrBlank()) add("$workerUrl$rawProxy")
+                    add(resolveRelativeUrl("https://videopark.top/", rawProxy))
+                }
+                for (cand in candidates) {
+                    if (emitHlsLinks(cand, embedUrl, linkName, callback)) break
+                }
+            }
+
+            embedUrl.contains("videopark.top/titan/", ignoreCase = true) -> {
+                val html = runCatching {
+                    app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).text
+                }.getOrNull() ?: return
+
+                val sd = extractJsonObjectAfter(html, "var _sd")
+                    ?: extractJsonObjectAfter(html, "_sd")
+                    ?: return
+
+                emitJsonTracks(sd.optJSONArray("subtitles"), embedUrl, seenSubs, subtitleCallback)
+
+                val streamUrl = sd.optString("stream_url").replace("\\/", "/").trim()
+                if (streamUrl.isNotBlank()) {
+                    emitHlsLinks(resolveRelativeUrl(embedUrl, streamUrl), vpReferer, linkName, callback)
+                }
+            }
+
             embedUrl.contains("videopark.top/", ignoreCase = true) -> {
                 val doc = runCatching {
                     app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).document

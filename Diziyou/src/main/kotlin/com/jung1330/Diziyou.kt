@@ -5,6 +5,8 @@ package com.jung1330
 import android.util.Log
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import java.net.URLEncoder
 
 class Diziyou : MainAPI() {
@@ -20,18 +22,49 @@ class Diziyou : MainAPI() {
         "$mainUrl/dizi-arsivi/" to "Dizi Arşivi"
     )
 
-    private val seriesRegex  = Regex("""^https://www\.diziyou\.one/([a-z0-9\-]+)/$""")
-    private val reserved     = setOf(
+    private val reserved = setOf(
         "dizi-arsivi", "uye-ol", "iletisim", "gizlilik", "dmca", "hakkimizda",
         "page", "category", "tag", "feed", "wp-login"
     )
-    private val seasonRegex  = Regex("""(\d+)-sezon-(\d+)-bolum""")
+    private val seasonRegex = Regex("""(\d+)-sezon-(\d+)-bolum""")
+    private val epSlugRegex = Regex("""^([a-z0-9\-]+?)-\d+-sezon-\d+-bolum$""")
 
-    override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val url = if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/"
-        val doc = app.get(url).document
-        val out = mutableListOf<SearchResponse>()
+    private fun extractValidPoster(scope: Element?): String? {
+        if (scope == null) return null
+        for (img in scope.select("img")) {
+            val raw = img.attr("data-src").ifBlank { img.attr("src") }.trim()
+            if (raw.isBlank() || raw.startsWith("data:") || raw.contains("/themes/")) continue
+            return fixUrlNull(raw)
+        }
+        return null
+    }
 
+    private fun parseSeriesItems(doc: Document): List<SearchResponse> {
+        val byUrl = linkedMapOf<String, SearchResponse>()
+
+        // 1) Dizi Arşivi ve Arama kartları (.single-item)
+        doc.select("div.single-item").forEach { item ->
+            val linkEl = item.selectFirst("#categorytitle a[href], .cat-img a[href], a[href]") ?: return@forEach
+            val href = fixUrlNull(linkEl.attr("href")) ?: return@forEach
+            if (!href.startsWith("$mainUrl/")) return@forEach
+
+            val path = href.removePrefix("$mainUrl/").trimEnd('/')
+            val slug = epSlugRegex.find(path)?.groupValues?.get(1) ?: path
+            if (slug.isBlank() || slug in reserved || slug.contains("/")) return@forEach
+
+            val title = item.selectFirst("#categorytitle a")?.text()?.trim().orEmpty()
+                .ifBlank { linkEl.attr("title").substringBefore(" izle").trim() }
+                .ifBlank { slug.replace('-', ' ').replaceFirstChar { it.uppercase() } }
+
+            val poster = extractValidPoster(item)
+            val seriesUrl = "$mainUrl/$slug/"
+
+            byUrl[seriesUrl] = newTvSeriesSearchResponse(title, seriesUrl, TvType.TvSeries) {
+                this.posterUrl = poster
+            }
+        }
+
+        // 2) Ana sayfa son bölümler ve diğer bağlantılar
         doc.select("a[href]").forEach { a ->
             val href = fixUrlNull(a.attr("href")) ?: return@forEach
             if (!href.startsWith("$mainUrl/")) return@forEach
@@ -39,23 +72,32 @@ class Diziyou : MainAPI() {
             val path = href.removePrefix("$mainUrl/").trimEnd('/')
             if (!path.matches(Regex("""^[a-z0-9\-]+$"""))) return@forEach
 
-            // Bölüm linkini diziye indir: scrubs-2-sezon-6-bolum -> scrubs
-            val slug = Regex("""^([a-z0-9\-]+?)-\d+-sezon-\d+-bolum$""")
-                .find(path)?.groupValues?.get(1) ?: path
+            val slug = epSlugRegex.find(path)?.groupValues?.get(1) ?: path
             if (slug in reserved) return@forEach
 
-            val title = a.attr("title").substringBefore(" izle").trim()
+            val seriesUrl = "$mainUrl/$slug/"
+            val existing = byUrl[seriesUrl]
+            val poster = extractValidPoster(a) ?: extractValidPoster(a.parent())
+            if (existing != null && existing.posterUrl != null) return@forEach
+
+            val rawTitle = a.attr("title").substringBefore(" izle").trim()
+                .replace(Regex("""\s+\d+\.\s*Sezon\s+\d+\.\s*B[öo]l[üu]m.*$""", RegexOption.IGNORE_CASE), "")
+                .trim()
+                .ifBlank { existing?.name.orEmpty() }
                 .ifBlank { slug.replace('-', ' ').replaceFirstChar { it.uppercase() } }
 
-            val poster = fixUrlNull(a.selectFirst("img")?.attr("src"))
-                ?.takeIf { !it.contains("/themes/") }
-
-            out.add(newTvSeriesSearchResponse(title, "$mainUrl/$slug/", TvType.TvSeries) {
-                this.posterUrl = poster
-            })
+            byUrl[seriesUrl] = newTvSeriesSearchResponse(rawTitle, seriesUrl, TvType.TvSeries) {
+                this.posterUrl = poster ?: existing?.posterUrl
+            }
         }
 
-        return newHomePageResponse(request.name, out.distinctBy { it.url })
+        return byUrl.values.toList()
+    }
+
+    override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        val url = if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/"
+        val doc = app.get(url).document
+        return newHomePageResponse(request.name, parseSeriesItems(doc))
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
@@ -66,28 +108,7 @@ class Diziyou : MainAPI() {
             Log.e("Diziyou", "Arama hatası: ${t.message}")
             return emptyList()
         }
-
-        val out = mutableListOf<SearchResponse>()
-        doc.select("a[href]").forEach { a ->
-            val href = fixUrlNull(a.attr("href")) ?: return@forEach
-            if (!href.startsWith("$mainUrl/")) return@forEach
-
-            val path = href.removePrefix("$mainUrl/").trimEnd('/')
-            if (!path.matches(Regex("""^[a-z0-9\-]+$"""))) return@forEach
-
-            val slug = Regex("""^([a-z0-9\-]+?)-\d+-sezon-\d+-bolum$""")
-                .find(path)?.groupValues?.get(1) ?: path
-            if (slug in reserved) return@forEach
-
-            val title = a.attr("title").substringBefore(" izle").trim()
-                .ifBlank { slug.replace('-', ' ').replaceFirstChar { it.uppercase() } }
-
-            out.add(newTvSeriesSearchResponse(title, "$mainUrl/$slug/", TvType.TvSeries) {
-                this.posterUrl = fixUrlNull(a.selectFirst("img")?.attr("src"))
-                    ?.takeIf { !it.contains("/themes/") }
-            })
-        }
-        return out.distinctBy { it.url }
+        return parseSeriesItems(doc)
     }
 
     override suspend fun load(url: String): LoadResponse? {
@@ -104,6 +125,7 @@ class Diziyou : MainAPI() {
             .trim()
 
         val poster = fixUrlNull(doc.selectFirst("meta[property='og:image']")?.attr("content"))
+            ?: extractValidPoster(doc)
         val plot   = doc.selectFirst("meta[name='description']")?.attr("content")?.trim()
 
         val episodes = doc.select("a[href*='-sezon-'][href*='-bolum']").mapNotNull { a ->
