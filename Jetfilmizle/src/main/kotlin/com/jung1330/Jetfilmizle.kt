@@ -333,7 +333,7 @@ class Jetfilmizle : MainAPI() {
         return true
     }
 
-    private fun emitDirectVideo(
+    private suspend fun emitDirectVideo(
         videoUrl: String,
         referer: String,
         linkName: String,
