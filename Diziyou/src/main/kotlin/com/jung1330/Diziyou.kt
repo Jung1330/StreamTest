@@ -146,8 +146,9 @@ class Diziyou : MainAPI() {
         val streamUrl = Regex("""https?://[^"'\\\s]+\.m3u8[^"'\\\s]*""").find(playerHtml)?.value
             ?: return false
 
+        val reqHeaders = mapOf("Referer" to playerUrl)
         val links = try {
-            M3u8Helper.generateM3u8(this.name, streamUrl, playerUrl)
+            M3u8Helper.generateM3u8(this.name, streamUrl, playerUrl, headers = reqHeaders)
         } catch (t: Throwable) {
             emptyList()
         }
@@ -165,6 +166,7 @@ class Diziyou : MainAPI() {
                 type   = ExtractorLinkType.M3U8
             ) {
                 this.referer = playerUrl
+                this.headers = reqHeaders
                 this.quality = Qualities.Unknown.value
             }
         )

@@ -157,9 +157,10 @@ class Dramadizilerim : MainAPI() {
         }
 
         val referer = embedUrl.ifBlank { "$mainUrl/" }
+        val reqHeaders = mapOf("Referer" to referer)
 
         val links = try {
-            M3u8Helper.generateM3u8(this.name, finalUrl, referer)
+            M3u8Helper.generateM3u8(this.name, finalUrl, referer, headers = reqHeaders)
         } catch (t: Throwable) {
             emptyList()
         }
@@ -176,7 +177,8 @@ class Dramadizilerim : MainAPI() {
                 url    = finalUrl,
                 type   = ExtractorLinkType.M3U8
             ) {
-                this.referer = "$mainUrl/"
+                this.referer = referer
+                this.headers = reqHeaders
                 this.quality = Qualities.Unknown.value
             }
         )

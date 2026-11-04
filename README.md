@@ -22,11 +22,24 @@ Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi s
   * Güncel ve popüler seriler için alternatif Türkçe anime akışı.
   * Çoklu oynatıcı (iframe, video etiketi, JSON kaynak listesi) taraması.
 * **HDFilmCehennemi (`hdfilmcehennemi.nl`):**
-  * Film kategorisi, DuckDuckGo destekli arama.
-  * Kendi oynatıcısındaki şifreli yayın adresini çözer; HLS kaliteleri (1080/720/480) ve altyazılar.
+  * Film ve yabancı dizi kategorileri, yerel JSON + DuckDuckGo destekli arama.
+  * Kendi oynatıcısındaki (`rplayer` / `CloseLoad`) şifreli yayın adresini çözer; çift sesli (TR Dublaj / Orijinal) birleşik (muxed) HLS akışları ile **izleme ve indirme** tam uyumlu.
 * **FilmMakinesi (`filmmakinesi.to`):**
-  * Sayfalanan film listesi, site içi arama.
-  * Şifreli oynatıcı çözümü, HLS kaliteleri ve altyazılar.
+  * Sayfalanan film ve dizi listesi, site içi arama.
+  * Şifreli oynatıcı çözümü, çift sesli birleşik (muxed) HLS kaliteleri, altyazılar ve tam indirme desteği.
+* **DiziBOX (`dizibox.live`):**
+  * Yabancı dizi arşivi, IMDb sıralaması ve tür kategorileri (sayfalama destekli).
+  * **DBX Pro (King/Molystream AES)**, **Moly+ (VidMoly)** ve alternatif oynatıcı çözümü; 1080p HLS, Türkçe altyazı ve tam indirme desteği.
+* **JetFilmizle (`jetfilmizle.app`):**
+  * Türkçe Dublaj & Altyazılı filmler, yabancı ve yerli diziler (sayfalama destekli).
+  * **OPlay**, **Gold**, **Vip**, **JetGlobal** ve çoklu oynatıcılarla doğrudan MP4 / 1080p HLS akışı ve sorunsuz indirme desteği.
+* **KoreanTürk (`koreanturk.tv`):**
+  * Kore dizileri, Kore filmleri ve BL dizileri arşivi (sayfalama destekli).
+  * HintPlayer, VidMoly, OK.ru, Sibnet, VK çoklu oynatıcı ve indirme desteği.
+* **Dizilla (`dizilla.now`) & Diziyou (`diziyou.one`):**
+  * Yabancı dizi arşivleri, sezon/bölüm listeleme, 1080p HLS yayın ve indirme uyumluluğu.
+* **HDKore (`hdkore.com`) & DramaDizilerim (`dramadizilerim.com`):**
+  * Asya & Kore dizileri, şifreli oynatıcı çözümü ve indirme uyumluluğu.
 
 ---
 

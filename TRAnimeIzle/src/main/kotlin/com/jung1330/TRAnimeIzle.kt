@@ -196,23 +196,53 @@ class TRAnimeIzle : MainAPI() {
             if (videoUrl.contains("doubleclick") || videoUrl.contains("/ads")) continue
 
             Log.d("TRAnimeIzle", "Oynatıcı » $videoUrl")
-            loaded = true
 
             if (videoUrl.matches(Regex(""".*\.(m3u8|mp4)(\?.*)?$""", RegexOption.IGNORE_CASE))) {
-                callback.invoke(
-                    newExtractorLink(
-                        source = this.name,
-                        name   = this.name,
-                        url    = videoUrl,
-                        type   = ExtractorLinkType.VIDEO
-                    ) {
-                        this.referer = "$mainUrl/"
-                        this.quality = Qualities.Unknown.value
+                val referer = "$mainUrl/"
+                if (videoUrl.contains(".m3u8", ignoreCase = true)) {
+                    val reqHeaders = mapOf("Referer" to referer)
+                    val links = try {
+                        M3u8Helper.generateM3u8(this.name, videoUrl, referer, headers = reqHeaders)
+                    } catch (t: Throwable) {
+                        emptyList()
                     }
-                )
+                    if (links.isNotEmpty()) {
+                        links.forEach { callback.invoke(it) }
+                    } else {
+                        callback.invoke(
+                            newExtractorLink(
+                                source = this.name,
+                                name   = this.name,
+                                url    = videoUrl,
+                                type   = ExtractorLinkType.M3U8
+                            ) {
+                                this.referer = referer
+                                this.headers = reqHeaders
+                                this.quality = Qualities.Unknown.value
+                            }
+                        )
+                    }
+                } else {
+                    callback.invoke(
+                        newExtractorLink(
+                            source = this.name,
+                            name   = this.name,
+                            url    = videoUrl,
+                            type   = ExtractorLinkType.VIDEO
+                        ) {
+                            this.referer = referer
+                            this.quality = Qualities.Unknown.value
+                        }
+                    )
+                }
+                loaded = true
             } else {
                 val handled = loadExtractor(videoUrl, "$mainUrl/", subtitleCallback, callback)
-                if (!handled) Log.w("TRAnimeIzle", "Bu oynatıcı için extractor yok: $videoUrl")
+                if (handled) {
+                    loaded = true
+                } else {
+                    Log.w("TRAnimeIzle", "Bu oynatıcı için extractor yok: $videoUrl")
+                }
             }
         }
 

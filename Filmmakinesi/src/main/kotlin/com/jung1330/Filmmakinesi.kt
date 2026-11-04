@@ -21,9 +21,22 @@ class Filmmakinesi : MainAPI() {
         "$mainUrl/filmler-1/" to "Filmler"
     )
 
-    private val encodedRegex  = Regex("""c82\("([^"]+)"\.split\("\^"\)\)""")
-    private val subtitleRegex = Regex(""""file"\s*:\s*"([^"]+\.vtt)"\s*,\s*"kind"\s*:\s*"captions"\s*,\s*"label"\s*:\s*"([^"]+)"""")
-    private val contentRegex  = Regex(""""contentUrl"\s*:\s*"([^"]+)"""")
+    private val packedRegex      = Regex("""(?s)eval\(function\(p,a,c,k,e,[dr]\)\{.*?\}\s*\('.*?',\s*\d+,\s*\d+,\s*'.*?'\.split\('\|'\)\s*(?:,\s*0\s*,\s*\{\s*\}\s*)?\)\)""")
+    private val payloadCallRegex = Regex("""\("([^"]{20,})"\.split\("([^"]+)"\)\)""")
+    private val directFileRegex  = Regex(""""?file"?\s*:\s*"(https?://[^"]+(?:\.m3u8|master\.txt)[^"]*)"""")
+    private val trackObjRegex    = Regex("""\{[^{}]*?"file"\s*:\s*"([^"]+\.(?:vtt|srt)(?:\?[^"]*)?)"[^{}]*\}""", RegexOption.IGNORE_CASE)
+    private val muxedAudioRegex  = Regex("""-v\d+-a\d+\.m3u8""", RegexOption.IGNORE_CASE)
+
+    private data class HlsAudioTrack(
+        val label: String,
+        val token: String?,
+        val isPreferred: Boolean
+    )
+
+    private data class HlsVariant(
+        val url: String,
+        val height: Int
+    )
 
     private fun cleanTitle(raw: String): String {
         return raw
@@ -121,12 +134,16 @@ class Filmmakinesi : MainAPI() {
             }
         }
 
-        val embed = doc.select("iframe").asSequence()
-            .mapNotNull { fixUrlNull(it.attr("data-src").ifBlank { it.attr("src") }) }
-            .firstOrNull { it.contains("/video/embed/") }
-            ?: return null
+        val hasPlayer = doc.select("[data-video_url]").any {
+            val v = it.attr("data-video_url")
+            v.contains("/video/embed/") || v.contains("rapid", true) || v.contains("/rplayer/", true)
+        } || doc.select("iframe").any {
+            val s = it.attr("data-src").ifBlank { it.attr("src") }
+            s.contains("/video/embed/") || s.contains("rapid", true) || s.contains("/rplayer/", true)
+        }
+        if (!hasPlayer) return null
 
-        return newMovieLoadResponse(title, url, TvType.Movie, embed) {
+        return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = poster
             this.plot      = plot
             this.year      = year
@@ -144,7 +161,7 @@ class Filmmakinesi : MainAPI() {
     }
 
     /** Embed sayfasındaki obfuscate edilmiş yayın adresini çözer. */
-    private fun decodeSource(data: String, host: String, sep: String = "^"): String {
+    private fun decodeRaw(data: String, host: String, sep: String): String {
         val parts = data.split(sep).toMutableList()
         val len   = parts.size - 2
         val p7    = len % 7
@@ -217,31 +234,175 @@ class Filmmakinesi : MainAPI() {
         return String(bytes, Charsets.UTF_8)
     }
 
-    /** Yeni tip embed'ler: sources:[{file:VAR}] + var VAR=fn("payload".split(SEP)) */
-    private fun resolvePacked(html: String, host: String): String? {
-        fun parse(src: String): String? {
-            val varName = Regex("""sources\s*:\s*\[\{file:\s*(\w+)""").find(src)?.groupValues?.get(1) ?: return null
-            val call = Regex("""var\s+""" + Regex.escape(varName) + """\s*=\s*\w+\("([^"]+)"\.split\("([^"]+)"\)\)""")
-                .find(src) ?: return null
-            return decodeSource(call.groupValues[1], host, call.groupValues[2])
+    /** Hostname kullanan (CloseLoad/Rapid) ve kullanmayan varyantların ikisini de dener. */
+    private fun decodePayload(payload: String, host: String, sep: String): String? {
+        for (candidateHost in listOf(host, "").distinct()) {
+            val decoded = runCatching { decodeRaw(payload, candidateHost, sep).trim() }.getOrNull()
+            if (!decoded.isNullOrBlank() && decoded.startsWith("http")) {
+                return decoded
+            }
         }
-
-        parse(html)?.let { return it }
-
-        val packed = Regex("""(?s)eval\(function\(p,a,c,k,e,[dr]\).*?""").find(html)?.value ?: return null
-        val unpacked = runCatching { getAndUnpack(packed) }.getOrNull() ?: return null
-        return parse(unpacked)
+        return null
     }
 
-    override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
-        // Dizi bölümü geldiyse oynatıcı iframe'ini bul
-        val embedUrl: String = if (data.contains("/sezon-") && data.contains("/bolum-")) {
-            val page = runCatching { app.get(data).document }.getOrNull() ?: return false
-            page.select("iframe").asSequence()
-                .mapNotNull { fixUrlNull(it.attr("data-src").ifBlank { it.attr("src") }) }
-                .firstOrNull { it.contains("/video/embed/") } ?: return false
-        } else data
+    private fun unescapeJs(value: String): String {
+        return Regex("""\\u([0-9a-fA-F]{4})""").replace(value) { m ->
+            m.groupValues[1].toInt(16).toChar().toString()
+        }.replace("\\/", "/")
+    }
 
+    private fun resolveRelativeUrl(baseUrl: String, target: String): String {
+        if (target.startsWith("http://") || target.startsWith("https://")) return target
+        if (target.startsWith("//")) return "https:$target"
+        return runCatching { URI(baseUrl).resolve(target).toString() }.getOrElse {
+            val cleanBase = baseUrl.substringBefore("?")
+            if (target.startsWith("/")) {
+                val origin = Regex("""^https?://[^/]+""").find(cleanBase)?.value.orEmpty()
+                "$origin$target"
+            } else {
+                val parent = cleanBase.substringBeforeLast("/", "")
+                "$parent/$target"
+            }
+        }
+    }
+
+    /**
+     * HLS oynatma listesini hem ExoPlayer hem de CloudStream indiricisiyle uyumlu şekilde çözer:
+     * - Rapidrame (nginx-vod) çift sesli yayınlarda ses+görüntü birleşik (muxed) `-v1-a1.m3u8` / `-v1-a2.m3u8`
+     *   medya listelerini üreterek indiricideki `M3u8 contains no video with audio` hatasını önler.
+     * - CloseLoad çift sesli yayınlarda sessiz video varyantına bölünmesini engelleyip ana listeyi korur.
+     */
+    private suspend fun emitHlsLinks(
+        mirrorLabel: String,
+        streamUrl: String,
+        referer: String,
+        callback: (ExtractorLink) -> Unit
+    ): Boolean {
+        val reqHeaders = mapOf("Referer" to referer)
+        val playlist = runCatching {
+            app.get(streamUrl, headers = reqHeaders, verify = false).text
+        }.getOrNull().orEmpty()
+
+        if (playlist.contains("#EXT-X-STREAM-INF")) {
+            val lines = playlist.lineSequence().map { it.trim() }.toList()
+            val audioTracks = mutableListOf<HlsAudioTrack>()
+            val variants = mutableListOf<HlsVariant>()
+
+            for (i in lines.indices) {
+                val line = lines[i]
+                if (line.startsWith("#EXT-X-MEDIA:") && line.contains("TYPE=AUDIO", ignoreCase = true)) {
+                    val uriAttr = Regex("""URI="([^"]+)"""").find(line)?.groupValues?.get(1) ?: continue
+                    val nameAttr = Regex("""NAME="([^"]+)"""").find(line)?.groupValues?.get(1).orEmpty()
+                    val langAttr = Regex("""LANGUAGE="([^"]+)"""").find(line)?.groupValues?.get(1).orEmpty()
+                    val isDefault = line.contains("DEFAULT=YES", ignoreCase = true)
+                    val token = Regex("""-a(\d+)\.m3u8""", RegexOption.IGNORE_CASE).find(uriAttr)?.groupValues?.get(1)
+                    val label = nameAttr.ifBlank { langAttr }.ifBlank { "Ses" }
+                    val isPreferred = label.contains("türk", ignoreCase = true) ||
+                        langAttr.equals("tr", ignoreCase = true) ||
+                        langAttr.equals("tur", ignoreCase = true) ||
+                        isDefault
+                    audioTracks.add(HlsAudioTrack(label, token, isPreferred))
+                } else if (line.startsWith("#EXT-X-STREAM-INF:")) {
+                    val height = Regex("""RESOLUTION=\d+x(\d+)""").find(line)?.groupValues?.get(1)?.toIntOrNull()
+                        ?: Qualities.Unknown.value
+                    val nextLine = lines.drop(i + 1).firstOrNull { it.isNotEmpty() && !it.startsWith("#") }
+                        ?: continue
+                    variants.add(HlsVariant(resolveRelativeUrl(streamUrl, nextLine), height))
+                }
+            }
+
+            val muxedVariants = variants.filter { muxedAudioRegex.containsMatchIn(it.url) }
+                .sortedByDescending { it.height }
+            val numberedAudios = audioTracks.filter { it.token != null }
+                .distinctBy { it.token }
+                .sortedByDescending { it.isPreferred }
+
+            if (numberedAudios.isNotEmpty() && muxedVariants.isNotEmpty()) {
+                for (audio in numberedAudios) {
+                    val linkName = if (numberedAudios.size > 1) "$mirrorLabel (${audio.label})" else mirrorLabel
+                    for (variant in muxedVariants) {
+                        val muxedUrl = variant.url.replace(
+                            Regex("""-a\d+\.m3u8""", RegexOption.IGNORE_CASE),
+                            "-a${audio.token}.m3u8"
+                        )
+                        callback.invoke(
+                            newExtractorLink(
+                                source = this.name,
+                                name   = linkName,
+                                url    = muxedUrl,
+                                type   = ExtractorLinkType.M3U8
+                            ) {
+                                this.referer = referer
+                                this.headers = reqHeaders
+                                this.quality = variant.height
+                            }
+                        )
+                    }
+                }
+                return true
+            }
+
+            if (audioTracks.isNotEmpty()) {
+                // Harici ses kanalı olup muxed varyant sunmayan CloseLoad yayınlarını parçalama (sessiz video oluşmasın)
+                callback.invoke(
+                    newExtractorLink(
+                        source = this.name,
+                        name   = mirrorLabel,
+                        url    = streamUrl,
+                        type   = ExtractorLinkType.M3U8
+                    ) {
+                        this.referer = referer
+                        this.headers = reqHeaders
+                        this.quality = Qualities.Unknown.value
+                    }
+                )
+                return true
+            }
+
+            if (variants.isNotEmpty()) {
+                for (variant in variants.sortedByDescending { it.height }) {
+                    callback.invoke(
+                        newExtractorLink(
+                            source = this.name,
+                            name   = mirrorLabel,
+                            url    = variant.url,
+                            type   = ExtractorLinkType.M3U8
+                        ) {
+                            this.referer = referer
+                            this.headers = reqHeaders
+                            this.quality = variant.height
+                        }
+                    )
+                }
+                return true
+            }
+        }
+
+        if (playlist.isNotBlank() && !playlist.contains("#EXTINF") && !playlist.contains("#EXTM3U")) {
+            return false
+        }
+
+        callback.invoke(
+            newExtractorLink(
+                source = this.name,
+                name   = mirrorLabel,
+                url    = streamUrl,
+                type   = ExtractorLinkType.M3U8
+            ) {
+                this.referer = referer
+                this.headers = reqHeaders
+                this.quality = Qualities.Unknown.value
+            }
+        )
+        return true
+    }
+
+    private suspend fun extractMirror(
+        embedUrl: String,
+        seenSubs: MutableSet<String>,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ): Boolean {
         val html = try {
             app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).text
         } catch (t: Throwable) {
@@ -249,44 +410,90 @@ class Filmmakinesi : MainAPI() {
         }
 
         val host = runCatching { URI(embedUrl).host }.getOrNull() ?: "closeload.filmmakinesi.to"
+        val isRapid = embedUrl.contains("rapid", ignoreCase = true) || embedUrl.contains("/rplayer/", ignoreCase = true)
+        val mirrorLabel = if (isRapid) "${this.name} Rapid" else "${this.name} CloseLoad"
 
-        val streamUrl = encodedRegex.find(html)?.let { match ->
-            runCatching { decodeSource(match.groupValues[1], host) }.getOrNull()
-        } ?: runCatching { resolvePacked(html, host) }.getOrNull()
+        val candidates = buildList {
+            add(html)
+            packedRegex.findAll(html).forEach { block ->
+                runCatching { JsUnpacker(block.value).unpack() }.getOrNull()?.let { add(it) }
+            }
+        }
+
+        // Altyazıları hem ham HTML hem de unpack edilmiş bloklardan topla
+        for (src in candidates) {
+            trackObjRegex.findAll(src).forEach { match ->
+                val obj = match.value
+                if (obj.contains("thumbnails", ignoreCase = true)) return@forEach
+                val rawSub = unescapeJs(match.groupValues[1]).trim()
+                val subUrl = resolveRelativeUrl(embedUrl, rawSub)
+                if (!seenSubs.add(subUrl)) return@forEach
+
+                val rawLabel = Regex(""""label"\s*:\s*"([^"]+)"""").find(obj)?.groupValues?.get(1)
+                    ?: Regex(""""language"\s*:\s*"([^"]+)"""").find(obj)?.groupValues?.get(1)
+                    ?: "Türkçe"
+                val subLang = unescapeJs(rawLabel).trim().ifBlank { "Türkçe" }
+                subtitleCallback.invoke(SubtitleFile(subLang, subUrl))
+            }
+        }
+
+        var streamUrl: String? = null
+        for (src in candidates) {
+            for (call in payloadCallRegex.findAll(src)) {
+                val decoded = decodePayload(call.groupValues[1], host, call.groupValues[2])
+                if (decoded != null) {
+                    streamUrl = decoded
+                    break
+                }
+            }
+            if (streamUrl != null) break
+            streamUrl = directFileRegex.find(src)?.groupValues?.get(1)?.let { unescapeJs(it) }
+            if (streamUrl != null) break
+        }
 
         if (streamUrl.isNullOrBlank()) {
             Log.e("FilmMakinesi", "Yayın adresi çözülemedi: $embedUrl")
             return false
         }
 
-        subtitleRegex.findAll(html).forEach { match ->
-            val subUrl  = match.groupValues[1].replace("\\/", "/")
-            val subLang = match.groupValues[2].lowercase()
-            subtitleCallback.invoke(SubtitleFile(subLang, subUrl))
-        }
+        return emitHlsLinks(mirrorLabel, streamUrl, embedUrl, callback)
+    }
 
-        val links = try {
-            M3u8Helper.generateM3u8(this.name, streamUrl, embedUrl)
-        } catch (t: Throwable) {
-            emptyList()
-        }
+    override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        val isContentPage = data.startsWith(mainUrl) || data.contains("/film/") || data.contains("/dizi/") ||
+            (data.contains("/sezon-") && data.contains("/bolum-"))
 
-        if (links.isNotEmpty()) {
-            links.forEach { callback.invoke(it) }
-            return true
-        }
+        val embedUrls: List<String> = if (isContentPage) {
+            val page = runCatching { app.get(data).document }.getOrNull() ?: return false
+            val collected = linkedSetOf<String>()
 
-        callback.invoke(
-            newExtractorLink(
-                source = this.name,
-                name   = this.name,
-                url    = streamUrl,
-                type   = ExtractorLinkType.M3U8
-            ) {
-                this.referer = embedUrl
-                this.quality = Qualities.Unknown.value
+            page.select("[data-video_url]").forEach { el ->
+                fixUrlNull(el.attr("data-video_url"))?.let { collected.add(it) }
             }
-        )
-        return true
+            page.select("iframe").forEach { iframe ->
+                fixUrlNull(iframe.attr("data-src").ifBlank { iframe.attr("src") })?.let { collected.add(it) }
+            }
+
+            collected.filter { u ->
+                (u.contains("/video/embed/") || u.contains("rapid", ignoreCase = true) || u.contains("/rplayer/", ignoreCase = true)) &&
+                    !u.contains("youtube.com", ignoreCase = true) &&
+                    !u.contains("youtu.be", ignoreCase = true)
+            }.sortedByDescending { u ->
+                u.contains("rapid", ignoreCase = true) || u.contains("/rplayer/", ignoreCase = true)
+            }
+        } else {
+            listOf(data)
+        }
+
+        if (embedUrls.isEmpty()) return false
+
+        val seenSubs = mutableSetOf<String>()
+        var anyEmitted = false
+        for (embedUrl in embedUrls) {
+            if (extractMirror(embedUrl, seenSubs, subtitleCallback, callback)) {
+                anyEmitted = true
+            }
+        }
+        return anyEmitted
     }
 }

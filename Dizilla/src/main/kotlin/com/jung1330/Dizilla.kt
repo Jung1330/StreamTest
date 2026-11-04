@@ -156,8 +156,10 @@ class Dizilla : MainAPI() {
             val master = source.optString("master").trim()
             if (master.isBlank()) continue
 
+            val referer = "$mainUrl/"
+            val reqHeaders = mapOf("Referer" to referer)
             val links = try {
-                M3u8Helper.generateM3u8(this.name, master, "$mainUrl/")
+                M3u8Helper.generateM3u8(this.name, master, referer, headers = reqHeaders)
             } catch (t: Throwable) {
                 emptyList()
             }
@@ -173,7 +175,8 @@ class Dizilla : MainAPI() {
                         url    = master,
                         type   = ExtractorLinkType.M3U8
                     ) {
-                        this.referer = "$mainUrl/"
+                        this.referer = referer
+                        this.headers = reqHeaders
                         this.quality = Qualities.Unknown.value
                     }
                 )
