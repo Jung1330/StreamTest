@@ -24,18 +24,23 @@ class Dizibox : MainAPI() {
     override val supportedTypes       = setOf(TvType.TvSeries)
 
     override val mainPage = mainPageOf(
-        "$mainUrl/dizi-arsivi/"                                       to "Son Eklenen Diziler",
-        "$mainUrl/dizi-arsivi/?ulke=&tur=&yil=&imdb=&orderby=imdb"    to "IMDb Puanına Göre",
-        "$mainUrl/dizi-arsivi/?tur=aksiyon"                           to "Aksiyon",
-        "$mainUrl/dizi-arsivi/?tur=dram"                              to "Dram",
-        "$mainUrl/dizi-arsivi/?tur=bilimkurgu"                        to "Bilimkurgu",
-        "$mainUrl/dizi-arsivi/?tur=suc"                               to "Suç"
+        "$mainUrl/"                to "Önerilen Diziler",
+        "$mainUrl/yil/2026/"       to "2026 Dizileri",
+        "$mainUrl/yil/2025/"       to "2025 Dizileri",
+        "$mainUrl/tur/aksiyon/"    to "Aksiyon",
+        "$mainUrl/tur/dram/"       to "Dram",
+        "$mainUrl/tur/bilimkurgu/" to "Bilimkurgu",
+        "$mainUrl/tur/suc/"        to "Suç",
+        "$mainUrl/tur/komedi/"     to "Komedi",
+        "$mainUrl/tur/gerilim/"    to "Gerilim"
     )
 
     private val seasonEpUrlRegex  = Regex("""(\d+)-sezon-(\d+)-bolum""", RegexOption.IGNORE_CASE)
     private val seasonEpTextRegex = Regex("""(\d+)\.\s*Sezon\s*(\d+)\.\s*B[öo]l[üu]m""", RegexOption.IGNORE_CASE)
     private val epOnlyUrlRegex    = Regex("""-(\d+)-bolum""", RegexOption.IGNORE_CASE)
     private val seasonOnlyRegex   = Regex("""(\d+)-sezon""", RegexOption.IGNORE_CASE)
+    private val plainImgUrlRegex  = Regex("""https?://[^\s"'<>]+\.(?:jpg|jpeg|png|webp)""", RegexOption.IGNORE_CASE)
+    private val anyYearRegex      = Regex("""\b(19|20)\d{2}\b""")
     private val cryptoJsRegex     = Regex("""CryptoJS\.AES\.decrypt\(\s*["']([^"']+)["']\s*,\s*["']([^"']+)["']\s*\)""")
     private val jwFileRegex       = Regex("""["']?file["']?\s*:\s*["'](https?://[^"']+)["']""")
     private val m3u8FileRegex     = Regex("""["']?file["']?\s*:\s*["'](https?://[^"']+\.m3u8[^"']*)["']""", RegexOption.IGNORE_CASE)
@@ -66,26 +71,63 @@ class Dizibox : MainAPI() {
             .trim()
     }
 
+    private fun upgradePoster(rawUrl: String?): String? {
+        val fixed = fixUrlNull(rawUrl)?.takeIf { !it.startsWith("data:") } ?: return null
+        return fixed.replace("-50x50.", "-200x290.")
+    }
+
     private fun parseCards(doc: Document): List<SearchResponse> {
         val out = mutableListOf<SearchResponse>()
 
-        doc.select("article.detailed-article, article.article-series-poster").forEach { article ->
-            val linkEl = article.selectFirst("h3 a[href*='/diziler/'], h2 a[href*='/diziler/'], a[href*='/diziler/']")
-                ?: return@forEach
+        // 1) Mobil & Android TV kategori / yıl arşivi kartları (article.poster-article)
+        doc.select("article.poster-article").forEach { article ->
+            val linkEl = article.selectFirst("a[href*='/diziler/']") ?: return@forEach
             val href = fixUrlNull(linkEl.attr("href")) ?: return@forEach
 
-            val rawTitle = article.selectFirst("h3 a, h2 a")?.text()?.trim().orEmpty()
-                .ifBlank { article.selectFirst("img")?.attr("alt")?.trim().orEmpty() }
+            val img = article.selectFirst("img")
+            val rawTitle = article.selectFirst("span.archive, figcaption")?.text()?.trim().orEmpty()
+                .ifBlank { img?.attr("alt")?.trim().orEmpty() }
                 .ifBlank { linkEl.attr("title").trim() }
                 .ifBlank { linkEl.text().trim() }
 
             val title = cleanTitle(rawTitle)
             if (title.isBlank()) return@forEach
 
+            val poster = upgradePoster(
+                img?.attr("data-src")?.takeIf { it.isNotBlank() && !it.startsWith("data:") }
+                    ?: img?.attr("src")
+            )
+
+            out.add(
+                newTvSeriesSearchResponse(title, href, TvType.TvSeries) {
+                    this.posterUrl = poster
+                }
+            )
+        }
+
+        // 2) Arama sonuçları ve masaüstü kartları (article.detailed-article, article.article-series-poster)
+        doc.select("article.detailed-article, article.article-series-poster").forEach { article ->
+            val linkEl = article.selectFirst("h3 a[href*='/diziler/'], h2 a[href*='/diziler/'], a[href*='/diziler/']")
+                ?: return@forEach
+            val href = fixUrlNull(linkEl.attr("href")) ?: return@forEach
+
             val img = article.selectFirst("img")
-            val poster = fixUrlNull(img?.attr("data-src")?.ifBlank { null } ?: img?.attr("src"))
-                ?.takeIf { !it.startsWith("data:") }
+            val rawTitle = article.selectFirst("h3 a, h2 a")?.text()?.trim().orEmpty()
+                .ifBlank { img?.attr("alt")?.trim().orEmpty() }
+                .ifBlank { linkEl.attr("title").trim() }
+                .ifBlank { linkEl.text().takeIf { !it.startsWith("http") }?.trim().orEmpty() }
+
+            val title = cleanTitle(rawTitle)
+            if (title.isBlank()) return@forEach
+
+            // Mobil aramada afiş bağlantısı <figure> içinde düz metin olarak gelebiliyor
+            val rawPoster = img?.attr("data-src")?.takeIf { it.isNotBlank() && !it.startsWith("data:") }
+                ?: img?.attr("src")?.takeIf { !it.startsWith("data:") }
+                ?: plainImgUrlRegex.find(article.selectFirst("figure")?.text().orEmpty())?.value
+            val poster = upgradePoster(rawPoster)
+
             val year = article.selectFirst("a[href*='/yil/'], .year")?.text()?.trim()?.toIntOrNull()
+                ?: anyYearRegex.find(article.selectFirst(".custom-fields-container")?.text().orEmpty())?.value?.toIntOrNull()
 
             out.add(
                 newTvSeriesSearchResponse(title, href, TvType.TvSeries) {
@@ -95,10 +137,38 @@ class Dizibox : MainAPI() {
             )
         }
 
+        // 3) Mobil ana sayfa önerilen diziler listesi (#recommended_series li)
+        doc.select("#recommended_series li").forEach { li ->
+            val linkEl = li.selectFirst("a[href*='/diziler/']") ?: return@forEach
+            val href = fixUrlNull(linkEl.attr("href")) ?: return@forEach
+
+            val img = li.selectFirst("img")
+            val rawTitle = li.selectFirst("h6, h5, h4")?.text()?.trim().orEmpty()
+                .ifBlank { linkEl.attr("title").trim() }
+                .ifBlank { img?.attr("alt")?.substringBefore(" - ")?.trim().orEmpty() }
+
+            val title = cleanTitle(rawTitle)
+            if (title.isBlank()) return@forEach
+
+            val poster = upgradePoster(
+                img?.attr("data-src")?.takeIf { it.isNotBlank() && !it.startsWith("data:") }
+                    ?: img?.attr("src")
+            )
+
+            out.add(
+                newTvSeriesSearchResponse(title, href, TvType.TvSeries) {
+                    this.posterUrl = poster
+                }
+            )
+        }
+
         return out.distinctBy { it.url }
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        if (page > 1 && request.data.trimEnd('/') == mainUrl.trimEnd('/')) {
+            return newHomePageResponse(request.name, emptyList())
+        }
         val pageUrl = buildPageUrl(request.data, page)
         val doc = app.get(pageUrl, cookies = dbxCookies()).document
         return newHomePageResponse(request.name, parseCards(doc))
@@ -152,11 +222,12 @@ class Dizibox : MainAPI() {
         val title = cleanTitle(rawTitle)
         if (title.isBlank()) return null
 
-        val poster = fixUrlNull(
-            doc.selectFirst("figure img.main-cover")?.let { it.attr("data-src").ifBlank { it.attr("src") } }
+        val poster = upgradePoster(
+            doc.selectFirst("figure#main-cover img, figure img.main-cover")
+                ?.let { it.attr("data-src").takeIf { s -> s.isNotBlank() && !s.startsWith("data:") } ?: it.attr("src") }
                 ?: doc.selectFirst("meta[property='og:image']")?.attr("content")
         )
-        val plot = doc.selectFirst("div.tv-story")?.text()?.trim()?.ifBlank { null }
+        val plot = doc.selectFirst("#tv-story p, div.tv-story p, div.tv-story, #tv-story")?.text()?.trim()?.ifBlank { null }
             ?: doc.selectFirst("meta[property='og:description']")?.attr("content")?.trim()
         val year = doc.selectFirst("a[href*='/yil/']")?.text()?.trim()?.toIntOrNull()
         val tags = doc.select("a[href*='/tur/']")
