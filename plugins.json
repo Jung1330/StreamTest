@@ -44,11 +44,11 @@
         "name": "Dizibox"
     },
     {
-        "iconUrl": "https://www.google.com/s2/favicons?domain=dizilla.now&sz=%size%",
-        "fileHash": "sha256-a660435110a018bc8c9939a53fd8eddc68b0e95254a32f5e5a39d4d1fb321308",
+        "iconUrl": "https://www.google.com/s2/favicons?domain=dizilla.la&sz=%size%",
+        "fileHash": "sha256-310fe94986559fae220127c721d87dc8c9c76fd53f180fea5d61e22f715e8620",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 14892,
+        "fileSize": 20255,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -59,9 +59,9 @@
         "tvTypes": [
             "TvSeries"
         ],
-        "version": 2,
+        "version": 3,
         "internalName": "Dizilla",
-        "description": "StreamTest - Dizilla Yabanc\u0131 Dizi Eklentisi (Pichive oynat\u0131c\u0131, 1080p HLS).",
+        "description": "StreamTest - Dizilla Yabanc\u0131 Dizi Eklentisi (Pichive gate + 1080p HLS).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizilla.cs3",
         "name": "Dizilla"
     },
@@ -90,10 +90,10 @@
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=diziyou.one&sz=%size%",
-        "fileHash": "sha256-02d0155a1294dfbfdecb6746808a03ea015871fbc5a745c7d72957ed076ad2e4",
+        "fileHash": "sha256-58b76274657012d5b423dfe65c4dede9b008ff91e6f71cbd8a259bd990580546",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 15042,
+        "fileSize": 15288,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -104,18 +104,18 @@
         "tvTypes": [
             "TvSeries"
         ],
-        "version": 4,
+        "version": 5,
         "internalName": "Diziyou",
         "description": "StreamTest - Diziyou Yabanc\u0131 Dizi Eklentisi (do\u011frudan HLS oynatma).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Diziyou.cs3",
         "name": "Diziyou"
     },
     {
-        "iconUrl": "https://www.google.com/s2/favicons?domain=dramadizilerim.com&sz=%size%",
-        "fileHash": "sha256-7e3203a5e7029ef92476186a6451498bb98b2e6279ffca00d439a093cfef1ec6",
+        "iconUrl": "https://www.google.com/s2/favicons?domain=dramadizilerim1.com&sz=%size%",
+        "fileHash": "sha256-f30ecb8a49798f0fdac611f26c00eddd4a72e30725b2970f1d9a7193b39dd47e",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 17642,
+        "fileSize": 17646,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -126,7 +126,7 @@
         "tvTypes": [
             "TvSeries"
         ],
-        "version": 4,
+        "version": 5,
         "internalName": "Dramadizilerim",
         "description": "StreamTest - Drama Dizilerim (dikey mini diziler) eklentisi: HLS oynatma deste\u011fi.",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dramadizilerim.cs3",
@@ -157,10 +157,10 @@
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmcehennemi.nl&sz=%size%",
-        "fileHash": "sha256-5b1346c778dd5e2718990288df760a6da808e752817312388566f25d0cbdd85c",
+        "fileHash": "sha256-9c721548f1e127e73de496c27628d3ae88bf32036a6881741574d1aacc217c82",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 32262,
+        "fileSize": 32454,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -172,7 +172,7 @@
             "Movie",
             "TvSeries"
         ],
-        "version": 6,
+        "version": 7,
         "internalName": "Hdfilmcehennemi",
         "description": "StreamTest - HDFilmCehennemi Film & Dizi Eklentisi (site i\u00e7i arama, HLS, altyaz\u0131 ve \u00e7ift sesli rplayer indirme deste\u011fi).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Hdfilmcehennemi.cs3",
@@ -203,10 +203,10 @@
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=jetfilmizle.app&sz=%size%",
-        "fileHash": "sha256-a5aec50a69e1279c5831100147d57369aa41698b23bff688c2f98172285b3398",
+        "fileHash": "sha256-be9d94f0417583f3c5fb380af20c4820884681bfeee381984b04b7e560c6dc39",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 39660,
+        "fileSize": 40911,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -218,7 +218,7 @@
             "Movie",
             "TvSeries"
         ],
-        "version": 2,
+        "version": 3,
         "internalName": "Jetfilmizle",
         "description": "StreamTest - JetFilmizle Film & Yabanc\u0131/Yerli Dizi Eklentisi (T\u00fcrk\u00e7e Dublaj & Altyaz\u0131l\u0131, 1080p MP4/HLS & \u0130ndirme Destekli).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Jetfilmizle.cs3",
@@ -226,10 +226,10 @@
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=koreanturk.tv&sz=%size%",
-        "fileHash": "sha256-ec87f36fa4e8fe0292425451f4b16edff91cd374263dc2d7ae442ecd948c8350",
+        "fileHash": "sha256-cb5855e4a878184fadd2d62235eba279e5c6d57b3e05c4c788110e4e580ef98e",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 26102,
+        "fileSize": 27032,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -242,7 +242,7 @@
             "TvSeries",
             "Movie"
         ],
-        "version": 1,
+        "version": 2,
         "internalName": "Koreanturk",
         "description": "StreamTest - KoreanT\u00fcrk Kore Dizileri & Filmleri Eklentisi (T\u00fcrk\u00e7e Altyaz\u0131l\u0131, \u00c7oklu Oynat\u0131c\u0131 & \u0130ndirme Destekli).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Koreanturk.cs3",
@@ -250,10 +250,10 @@
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=tranimeizle.live&sz=%size%",
-        "fileHash": "sha256-28f2165a421d1e86ac670b0468db3dbf508836edf0276e22632cc4949dad04b1",
+        "fileHash": "sha256-6d1d015baa645fc8976b5606855c1d60b0462915b5178f23d857f9ade17dba12",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 16286,
+        "fileSize": 27011,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -264,9 +264,9 @@
         "tvTypes": [
             "Anime"
         ],
-        "version": 3,
+        "version": 4,
         "internalName": "TRAnimeIzle",
-        "description": "StreamTest - TRAnime\u0130zle G\u00fcncel Anime Eklentisi (kategoriler, arama ve oynat\u0131c\u0131 taramas\u0131 d\u00fczeltildi).",
+        "description": "StreamTest - TRAnime\u0130zle G\u00fcncel Anime Eklentisi (yeni site API'si: s\u0131ralama, katalog aramas\u0131, b\u00f6l\u00fcm listesi ve HLS kaynak \u00e7\u00f6z\u00fcm\u00fc).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/TRAnimeIzle.cs3",
         "name": "TRAnimeIzle"
     }
