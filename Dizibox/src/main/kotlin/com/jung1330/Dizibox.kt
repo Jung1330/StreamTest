@@ -363,7 +363,7 @@ class Dizibox : MainAPI() {
         }
 
         val checkText = runCatching { app.get(streamUrl, headers = reqHeaders, verify = false).text }.getOrNull().orEmpty()
-        if (checkText.isNotBlank() && !checkText.contains("#EXTM3U") && !checkText.contains("#EXTINF")) {
+        if (!checkText.contains("#EXTM3U") && !checkText.contains("#EXTINF")) {
             return false
         }
 

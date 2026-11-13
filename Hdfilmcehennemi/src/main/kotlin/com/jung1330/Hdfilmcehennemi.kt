@@ -28,7 +28,8 @@ class Hdfilmcehennemi : MainAPI() {
 
     private val filmRegex        = Regex("""^https://www\.hdfilmcehennemi\.nl/[a-z0-9\-]+/?$""")
     private val seriesRegex      = Regex("""^https://www\.hdfilmcehennemi\.nl/dizi/([^/]+)/?$""")
-    private val episodeUrlRegex  = Regex("""^https://www\.hdfilmcehennemi\.nl/dizi/([^/]+)/sezon-\d+/bolum-\d+/?$""")
+    private val episodeUrlRegex  = Regex("""^https://www\.hdfilmcehennemi\.nl/dizi/([^/]+)/sezon-\d+/bolum-\d+[^/]*/?$""")
+    private val seriFilmRegex    = Regex("""^https://www\.hdfilmcehennemi\.nl/serifilmlerim-\d+/[^/]+/?$""")
     private val packedRegex      = Regex("""(?s)eval\(function\(p,a,c,k,e,[dr]\)\{.*?\}\s*\('.*?',\s*\d+,\s*\d+,\s*'.*?'\.split\('\|'\)\s*(?:,\s*0\s*,\s*\{\s*\}\s*)?\)\)""")
     private val payloadCallRegex = Regex("""\("([^"]{20,})"\.split\("([^"]+)"\)\)""")
     private val directFileRegex  = Regex(""""?file"?\s*:\s*"(https?://[^"]+(?:\.m3u8|master\.txt)[^"]*)"""")
@@ -73,6 +74,12 @@ class Hdfilmcehennemi : MainAPI() {
                 directMatch != null -> newTvSeriesSearchResponse(
                     title.substringBefore(" izle").trim(),
                     "$mainUrl/dizi/${directMatch.groupValues[1]}/",
+                    TvType.TvSeries
+                ) { this.posterUrl = poster }
+
+                seriFilmRegex.matches(href) -> newTvSeriesSearchResponse(
+                    title.substringBefore(" izle").trim(),
+                    href,
                     TvType.TvSeries
                 ) { this.posterUrl = poster }
 
@@ -143,12 +150,18 @@ class Hdfilmcehennemi : MainAPI() {
                 runCatching { URLDecoder.decode(raw.substringAfter("uddg=").substringBefore("&"), "UTF-8") }.getOrNull()
             } else raw
 
-            if (url == null || !filmRegex.matches(url)) return@mapNotNull null
+            if (url == null) return@mapNotNull null
 
-            val title = a.text().trim()
+            val title = a.text().substringBefore(" izle").substringBefore(" | ").trim()
             if (title.isBlank()) return@mapNotNull null
 
-            newMovieSearchResponse(title, url, TvType.Movie)
+            when {
+                seriesRegex.matches(url) || seriFilmRegex.matches(url) ->
+                    newTvSeriesSearchResponse(title, url, TvType.TvSeries)
+                filmRegex.matches(url) ->
+                    newMovieSearchResponse(title, url, TvType.Movie)
+                else -> null
+            }
         }.distinctBy { it.url }
     }
 
@@ -197,6 +210,40 @@ class Hdfilmcehennemi : MainAPI() {
             }
         }
 
+        if (seriFilmRegex.matches(url)) {
+            val movies = doc.select("a.poster").mapNotNull { a ->
+                val movieHref = fixUrlNull(a.attr("href")) ?: return@mapNotNull null
+                if (!filmRegex.matches(movieHref)) return@mapNotNull null
+                val movieTitle = a.attr("title").trim()
+                    .ifBlank { a.selectFirst(".poster-title, strong, h2, h3, span")?.text()?.trim().orEmpty() }
+                    .ifBlank { a.text().trim() }
+                    .substringBefore(" izle")
+                    .trim()
+                val img = a.selectFirst("img")
+                val moviePoster = fixUrlNull(img?.attr("data-src"))
+                    ?: fixUrlNull(img?.attr("src"))?.takeIf { !it.startsWith("data:") }
+                Triple(movieHref, movieTitle.ifBlank { title }, moviePoster)
+            }.distinctBy { it.first }
+
+            if (movies.isEmpty()) return null
+
+            val episodes = movies.mapIndexed { idx, (movieHref, movieTitle, moviePoster) ->
+                newEpisode(movieHref) {
+                    this.name      = movieTitle
+                    this.season    = 1
+                    this.episode   = idx + 1
+                    this.posterUrl = moviePoster
+                }
+            }
+
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
+                this.posterUrl = poster ?: movies.firstOrNull()?.third
+                this.plot      = plot
+                this.year      = year
+                this.tags      = tags
+            }
+        }
+
         val hasPlayer = doc.select("iframe").any {
             val s = it.attr("data-src").ifBlank { it.attr("src") }
             s.contains("/video/embed/") || s.contains("/rplayer/") || s.contains("rapid", true)
@@ -222,7 +269,7 @@ class Hdfilmcehennemi : MainAPI() {
 
     /** Embed / rplayer sayfasındaki obfuscate edilmiş yayın adresini çözer. */
     private fun decodeRaw(payload: String, host: String, sep: String): String {
-        val parts = payload.split(sep).toMutableList()
+        val parts = payload.replace("\\/", "/").split(sep).toMutableList()
         val len   = parts.size - 2
         val c78   = len % 7
         val ggn   = 8 + (len % 5)
@@ -447,7 +494,7 @@ class Hdfilmcehennemi : MainAPI() {
             }
         }
 
-        if (playlist.isNotBlank() && !playlist.contains("#EXTINF") && !playlist.contains("#EXTM3U")) {
+        if (!playlist.contains("#EXTINF") && !playlist.contains("#EXTM3U")) {
             return false
         }
 
@@ -516,7 +563,8 @@ class Hdfilmcehennemi : MainAPI() {
                 }
             }
             if (streamUrl != null) break
-            streamUrl = directFileRegex.find(src)?.groupValues?.get(1)?.let { unescapeJs(it) }
+            val cleanSrc = src.replace(Regex("""(?is)<script[^>]*application/ld\+json[^>]*>.*?</script>"""), "")
+            streamUrl = directFileRegex.find(cleanSrc)?.groupValues?.get(1)?.let { unescapeJs(it) }
             if (streamUrl != null) break
         }
 

@@ -245,7 +245,7 @@ class Koreanturk : MainAPI() {
         }
 
         val checkText = runCatching { app.get(streamUrl, headers = reqHeaders, verify = false).text }.getOrNull().orEmpty()
-        if (checkText.isNotBlank() && !checkText.contains("#EXTM3U") && !checkText.contains("#EXTINF")) {
+        if (!checkText.contains("#EXTM3U") && !checkText.contains("#EXTINF")) {
             return false
         }
 
@@ -311,6 +311,8 @@ class Koreanturk : MainAPI() {
         iframeUrl: String,
         pageUrl: String,
         label: String,
+        seenSubs: MutableSet<String>,
+        subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val originRef = runCatching {
@@ -333,6 +335,20 @@ class Koreanturk : MainAPI() {
 
         val finalStream = streamPath?.takeIf { it.isNotBlank() }?.let { resolveRelativeUrl(originRef, it) }
             ?: return false
+
+        val baseDir = finalStream.substringBefore("?").substringBeforeLast("/", "")
+        if (baseDir.startsWith("http")) {
+            for ((vttFile, vttLabel) in listOf("turkce.vtt" to "Türkçe", "ingilizce.vtt" to "İngilizce")) {
+                val subCandidate = "$baseDir/$vttFile"
+                if (seenSubs.contains(subCandidate)) continue
+                val body = runCatching {
+                    app.get(subCandidate, headers = mapOf("Referer" to originRef), verify = false).text
+                }.getOrNull().orEmpty()
+                if (body.trimStart().startsWith("WEBVTT", ignoreCase = true) && seenSubs.add(subCandidate)) {
+                    subtitleCallback.invoke(SubtitleFile(vttLabel, subCandidate))
+                }
+            }
+        }
 
         val linkName = "${this.name} ($label)"
         if (finalStream.endsWith(".mp4", ignoreCase = true)) {
@@ -421,7 +437,7 @@ class Koreanturk : MainAPI() {
 
                 when {
                     iframeUrl.contains("hintdizi.com", ignoreCase = true) || videoParamRegex.containsMatchIn(iframeUrl) -> {
-                        extractHintPlayer(iframeUrl, partUrl, partLabel, wrappedCallback)
+                        extractHintPlayer(iframeUrl, partUrl, partLabel, seenSubs, subtitleCallback, wrappedCallback)
                     }
 
                     iframeUrl.contains("vidmoly", ignoreCase = true) -> {

@@ -18,7 +18,8 @@ class Filmmakinesi : MainAPI() {
     override val supportedTypes       = setOf(TvType.Movie, TvType.TvSeries)
 
     override val mainPage = mainPageOf(
-        "$mainUrl/filmler-1/" to "Filmler"
+        "$mainUrl/filmler-1/"              to "Filmler",
+        "$mainUrl/yabanci-dizi-izle-fmq45w/" to "Yabancı Diziler"
     )
 
     private val packedRegex      = Regex("""(?s)eval\(function\(p,a,c,k,e,[dr]\)\{.*?\}\s*\('.*?',\s*\d+,\s*\d+,\s*'.*?'\.split\('\|'\)\s*(?:,\s*0\s*,\s*\{\s*\}\s*)?\)\)""")
@@ -162,7 +163,7 @@ class Filmmakinesi : MainAPI() {
 
     /** Embed sayfasındaki obfuscate edilmiş yayın adresini çözer. */
     private fun decodeRaw(data: String, host: String, sep: String): String {
-        val parts = data.split(sep).toMutableList()
+        val parts = data.replace("\\/", "/").split(sep).toMutableList()
         val len   = parts.size - 2
         val p7    = len % 7
         val um    = 8 + (len % 5)
@@ -378,7 +379,7 @@ class Filmmakinesi : MainAPI() {
             }
         }
 
-        if (playlist.isNotBlank() && !playlist.contains("#EXTINF") && !playlist.contains("#EXTM3U")) {
+        if (!playlist.contains("#EXTINF") && !playlist.contains("#EXTM3U")) {
             return false
         }
 
@@ -447,7 +448,8 @@ class Filmmakinesi : MainAPI() {
                 }
             }
             if (streamUrl != null) break
-            streamUrl = directFileRegex.find(src)?.groupValues?.get(1)?.let { unescapeJs(it) }
+            val cleanSrc = src.replace(Regex("""(?is)<script[^>]*application/ld\+json[^>]*>.*?</script>"""), "")
+            streamUrl = directFileRegex.find(cleanSrc)?.groupValues?.get(1)?.let { unescapeJs(it) }
             if (streamUrl != null) break
         }
 

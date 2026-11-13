@@ -160,42 +160,81 @@ class Diziyou : MainAPI() {
         }
 
         val iframe = page.selectFirst("iframe[src]")?.attr("src") ?: return false
-        val playerUrl = fixUrl(iframe)
+        val rawPlayerUrl = fixUrl(iframe)
+        val basePlayerUrl = rawPlayerUrl
+            .replace("_tr.html", ".html")
+            .replace("_enSub.html", ".html")
 
-        val playerHtml = try {
-            app.get(playerUrl, headers = mapOf("Referer" to data)).text
-        } catch (t: Throwable) {
-            Log.e("Diziyou", "Oynatıcı açılamadı: ${t.message}")
-            return false
-        }
-
-        val streamUrl = Regex("""https?://[^"'\\\s]+\.m3u8[^"'\\\s]*""").find(playerHtml)?.value
-            ?: return false
-
-        val reqHeaders = mapOf("Referer" to playerUrl)
-        val links = try {
-            M3u8Helper.generateM3u8(this.name, streamUrl, playerUrl, headers = reqHeaders)
-        } catch (t: Throwable) {
-            emptyList()
-        }
-
-        if (links.isNotEmpty()) {
-            links.forEach { callback.invoke(it) }
-            return true
-        }
-
-        callback.invoke(
-            newExtractorLink(
-                source = this.name,
-                name   = this.name,
-                url    = streamUrl,
-                type   = ExtractorLinkType.M3U8
-            ) {
-                this.referer = playerUrl
-                this.headers = reqHeaders
-                this.quality = Qualities.Unknown.value
+        val optionIds = page.select("span.diziyouOption[id]").map { it.attr("id").trim() }.toSet()
+        val variants = buildList {
+            if (optionIds.isEmpty() || "turkceAltyazili" in optionIds) {
+                add(basePlayerUrl to "${this@Diziyou.name} (Türkçe Altyazılı)")
             }
-        )
-        return true
+            if ("turkceDublaj" in optionIds) {
+                add(basePlayerUrl.replace(".html", "_tr.html") to "${this@Diziyou.name} (Türkçe Dublaj)")
+            }
+            if ("ingilizceAltyazili" in optionIds) {
+                add(basePlayerUrl.replace(".html", "_enSub.html") to "${this@Diziyou.name} (İngilizce Altyazılı)")
+            }
+            if (isEmpty()) {
+                add(rawPlayerUrl to this@Diziyou.name)
+            }
+        }
+
+        val seenSubs = mutableSetOf<String>()
+        var anyEmitted = false
+
+        for ((playerUrl, linkLabel) in variants) {
+            val playerHtml = try {
+                app.get(playerUrl, headers = mapOf("Referer" to data)).text
+            } catch (t: Throwable) {
+                Log.e("Diziyou", "Oynatıcı açılamadı ($playerUrl): ${t.message}")
+                continue
+            }
+
+            val playerDoc = org.jsoup.Jsoup.parse(playerHtml, playerUrl)
+            playerDoc.select("track[src]").forEach { track ->
+                val kind = track.attr("kind").lowercase()
+                if (kind == "thumbnails" || kind == "chapters") return@forEach
+                val subUrl = fixUrlNull(track.attr("src")) ?: return@forEach
+                if (!seenSubs.add(subUrl)) return@forEach
+                val subLabel = track.attr("label").trim()
+                    .ifBlank { track.attr("srclang").trim() }
+                    .ifBlank { "Türkçe" }
+                subtitleCallback.invoke(SubtitleFile(subLabel, subUrl))
+            }
+
+            val streamUrl = Regex("""https?://[^"'\\\s]+\.m3u8[^"'\\\s]*""").find(playerHtml)?.value
+                ?: continue
+
+            val reqHeaders = mapOf("Referer" to playerUrl)
+            val links = try {
+                M3u8Helper.generateM3u8(this.name, streamUrl, playerUrl, headers = reqHeaders, name = linkLabel)
+            } catch (t: Throwable) {
+                emptyList()
+            }
+
+            if (links.isNotEmpty()) {
+                links.forEach { callback.invoke(it) }
+                anyEmitted = true
+                continue
+            }
+
+            callback.invoke(
+                newExtractorLink(
+                    source = this.name,
+                    name   = linkLabel,
+                    url    = streamUrl,
+                    type   = ExtractorLinkType.M3U8
+                ) {
+                    this.referer = playerUrl
+                    this.headers = reqHeaders
+                    this.quality = Qualities.Unknown.value
+                }
+            )
+            anyEmitted = true
+        }
+
+        return anyEmitted
     }
 }

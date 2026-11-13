@@ -108,14 +108,14 @@ class AnimeciX : MainAPI() {
         ).parsedSafe<Title>() ?: return null
         val episodes = mutableListOf<Episode>()
 
-        if (response.title.titleType == "anime") {
+        if (response.title.titleType == "anime" && response.title.seasons.isNotEmpty()) {
             for (sezon in response.title.seasons) {
                 val relUrl = "${mainUrl}/secure/related-videos?episode=1&season=${sezon.number}&videoId=0&titleId=${titleId}"
                 val relQuery = relUrl.substringAfter("?", "")
                 val sezonResponse = app.get(
                     relUrl,
                     headers = getApiHeaders(relQuery)
-                ).parsedSafe<TitleVideos>() ?: return null
+                ).parsedSafe<TitleVideos>() ?: continue
                 for (video in sezonResponse.videos) {
                     episodes.add(newEpisode(video.url) {
                         this.name = "${video.seasonNum}. Sezon ${video.episodeNum}. Bölüm"
@@ -125,8 +125,17 @@ class AnimeciX : MainAPI() {
                 }
             }
         } else {
-            if (response.title.videos.isNotEmpty()) {
-                episodes.add(newEpisode(response.title.videos.first().url) {
+            val playableVideos = response.title.videos.filterNot {
+                it.url.contains("youtube.com", ignoreCase = true) ||
+                    it.url.contains("youtu.be", ignoreCase = true)
+            }.ifEmpty { response.title.videos }
+
+            if (playableVideos.isNotEmpty()) {
+                val combinedUrls = playableVideos.map { it.url.trim() }
+                    .filter { it.isNotEmpty() }
+                    .distinct()
+                    .joinToString("|")
+                episodes.add(newEpisode(combinedUrls) {
                     this.name    = "Filmi İzle"
                     this.season  = 1
                     this.episode = 1
@@ -152,16 +161,47 @@ class AnimeciX : MainAPI() {
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         Log.d("ACX", "data » $data")
-        val fullUrl = if (data.startsWith("http")) data else "${mainUrl}/${data}"
-        val query = fullUrl.substringAfter("?", "")
-        val iframeLink = app.get(
-            fullUrl,
-            headers = getApiHeaders(query)
-        ).url
-        Log.d("ACX", "iframeLink » $iframeLink")
+        val rawCandidates = data.split("|").map { it.trim() }.filter { it.isNotEmpty() }
+        val embedUrls = linkedSetOf<String>()
 
-        loadExtractor(iframeLink, "${mainUrl}/", subtitleCallback, callback)
+        for (item in rawCandidates) {
+            val isInternal = !item.startsWith("http") || item.startsWith(mainUrl, ignoreCase = true)
+            if (isInternal) {
+                val fullUrl = if (item.startsWith("http")) item else "${mainUrl}/${item.trimStart('/')}"
+                val query = fullUrl.substringAfter("?", "")
 
-        return true
+                if (fullUrl.contains("secure/best-video") && query.isNotBlank()) {
+                    val epVideosUrl = "${mainUrl}/secure/episode-videos?$query"
+                    runCatching {
+                        val list = app.get(epVideosUrl, headers = getApiHeaders(query)).parsedSafe<Array<Video>>()
+                        list?.forEach { v ->
+                            val u = v.url.trim()
+                            if (u.startsWith("http") && !u.contains("youtube.com", true) && !u.contains("youtu.be", true)) {
+                                embedUrls.add(u)
+                            }
+                        }
+                    }
+                }
+
+                runCatching {
+                    val redirected = app.get(fullUrl, headers = getApiHeaders(query)).url
+                    if (redirected.startsWith("http") && !redirected.contains("/secure/")) {
+                        embedUrls.add(redirected)
+                    }
+                }
+            } else {
+                embedUrls.add(item)
+            }
+        }
+
+        var anyLoaded = false
+        for (iframeLink in embedUrls) {
+            Log.d("ACX", "iframeLink » $iframeLink")
+            if (loadExtractor(iframeLink, "${mainUrl}/", subtitleCallback, callback)) {
+                anyLoaded = true
+            }
+        }
+
+        return anyLoaded
     }
 }

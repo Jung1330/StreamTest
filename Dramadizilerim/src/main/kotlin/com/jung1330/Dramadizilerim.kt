@@ -20,22 +20,29 @@ class Dramadizilerim : MainAPI() {
 
     override val mainPage = mainPageOf(
         "$mainUrl/diziler?page="             to "Tüm Diziler",
+        "$mainUrl/populer?page="             to "Popüler Diziler",
+        "$mainUrl/yeni-cikanlar?page="       to "Yeni Çıkanlar",
         "$mainUrl/turkce-dublaj-drama?page=" to "Türkçe Dublaj",
         "$mainUrl/kore-dramalari?page="      to "Kore Dramaları",
         "$mainUrl/cin-dramalari?page="       to "Çin Dramaları"
     )
 
-    private val numEpsRegex    = Regex(""""numberOfEpisodes"\s*:\s*(\d+)""")
-    private val epCountRegex   = Regex(""""episodeCount"\s*:\s*(\d+)""")
-    private val episodeIdRegex = Regex(""""episodeId"\s*:\s*"([a-zA-Z0-9_-]{8,})"""")
+    private val numEpsRegex        = Regex(""""numberOfEpisodes"\s*:\s*(\d+)""")
+    private val epCountRegex       = Regex(""""episodeCount"\s*:\s*(\d+)""")
+    private val episodeIdRegex     = Regex(""""episodeId"\s*:\s*"([a-zA-Z0-9_-]{8,})"""")
+    private val dataEpisodeIdRegex = Regex("""data-episode-id=["']([a-zA-Z0-9_-]{8,})["']""")
 
     private fun parseCatalogCards(doc: Document): List<SearchResponse> {
         val out = mutableListOf<SearchResponse>()
 
-        doc.select("article.title-card a.card-link[href*='/dizi/'], a.card-link[href*='/dizi/'], a.video-item-card[href*='/dizi/']")
+        doc.select(
+            "article.title-card a.card-link[href], " +
+                "a.card-link[href*='/dizi/'], a.card-link[href*='/series/'], " +
+                "a.video-item-card[href*='/dizi/'], a.video-item-card[href*='/series/']"
+        )
             .forEach { a ->
                 val href = fixUrlNull(a.attr("href")) ?: return@forEach
-                if (!href.contains("/dizi/")) return@forEach
+                if (!href.contains("/dizi/") && !href.contains("/series/")) return@forEach
 
                 val rawTitle = a.selectFirst("h3, h2, .card-title, .video-item-title")?.text()?.trim().orEmpty()
                     .ifBlank { a.attr("aria-label").substringBefore(" — ").substringBefore(" - ").trim() }
@@ -116,10 +123,17 @@ class Dramadizilerim : MainAPI() {
         if (title.isBlank()) return null
 
         val poster = fixUrlNull(doc.selectFirst("meta[property='og:image']")?.attr("content"))
+            ?: fixUrlNull(doc.selectFirst(".poster img, main img")?.attr("src"))
         val plot = doc.selectFirst("meta[property='og:description']")?.attr("content")?.trim()
             ?: doc.selectFirst("meta[name='description']")?.attr("content")?.trim()
 
         val slug = url.substringBefore("?").trimEnd('/').substringAfterLast("/")
+        val langPrefix = Regex("""/([a-z]{2})/series/""").find(url)?.groupValues?.get(1)
+        val watchBase = if (!langPrefix.isNullOrBlank()) {
+            "$mainUrl/$langPrefix/watch/$slug"
+        } else {
+            "$mainUrl/izle/$slug"
+        }
         val unescaped = html.replace("\\\"", "\"").replace("\\\\", "\\")
 
         var totalEps = numEpsRegex.findAll(unescaped)
@@ -128,7 +142,7 @@ class Dramadizilerim : MainAPI() {
             ?: epCountRegex.find(unescaped)?.groupValues?.get(1)?.toIntOrNull()
 
         if (totalEps == null || totalEps <= 0) {
-            val watchHtml = runCatching { app.get("$mainUrl/izle/$slug").text }.getOrNull().orEmpty()
+            val watchHtml = runCatching { app.get(watchBase).text }.getOrNull().orEmpty()
                 .replace("\\\"", "\"")
             totalEps = numEpsRegex.findAll(watchHtml)
                 .mapNotNull { it.groupValues[1].toIntOrNull() }
@@ -137,7 +151,7 @@ class Dramadizilerim : MainAPI() {
 
         val count = (totalEps ?: 1).coerceAtLeast(1)
         val episodes = (1..count).map { ep ->
-            newEpisode("$mainUrl/izle/$slug?s=1&e=$ep") {
+            newEpisode("$watchBase?s=1&e=$ep") {
                 this.name    = "1. Sezon $ep. Bölüm"
                 this.season  = 1
                 this.episode = ep
@@ -165,6 +179,7 @@ class Dramadizilerim : MainAPI() {
 
         val unescaped = watchHtml.replace("\\\"", "\"").replace("\\\\", "\\")
         val episodeId = episodeIdRegex.find(unescaped)?.groupValues?.get(1)
+            ?: dataEpisodeIdRegex.find(unescaped)?.groupValues?.get(1)
         if (episodeId.isNullOrBlank()) {
             Log.e("DramaDizilerim", "episodeId bulunamadı: $data")
             return false
@@ -238,6 +253,10 @@ class Dramadizilerim : MainAPI() {
         if (links.isNotEmpty()) {
             links.forEach(callback)
             return true
+        }
+
+        if (!playlist.contains("#EXTM3U") && !playlist.contains("#EXTINF")) {
+            return false
         }
 
         callback.invoke(

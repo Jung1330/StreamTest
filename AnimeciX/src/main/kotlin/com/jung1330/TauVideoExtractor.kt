@@ -33,6 +33,7 @@ open class TauVideo : ExtractorApi() {
 
         val api = app.get(videoUrl).parsedSafe<TauVideoUrls>() ?: throw ErrorLoadingException("TauVideo")
 
+        val reqHeaders = if (extRef.isNotBlank()) mapOf("Referer" to extRef) else emptyMap()
         for (video in api.urls) {
             callback.invoke(
                 newExtractorLink(
@@ -42,6 +43,7 @@ open class TauVideo : ExtractorApi() {
                     type    = ExtractorLinkType.VIDEO
                 ) {
                     this.referer = extRef
+                    this.headers = reqHeaders
                     this.quality = getQuality(video.label)
                 }
             )

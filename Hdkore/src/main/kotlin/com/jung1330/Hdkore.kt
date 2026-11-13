@@ -188,22 +188,23 @@ class Hdkore : MainAPI() {
             }
         }
 
-        val slug = url.substringBefore("?").trimEnd('/').substringAfterLast("/")
         val baseBolumUrl = doc.selectFirst("a[href*='/bolum/']")?.attr("href")
             ?.let { fixUrl(it).substringBefore("?") }
-            ?: "$mainUrl/bolum/$slug"
+            ?: url.substringBefore("?")
 
-        var totalEps = numEpsRegex.findAll(doc.html())
+        val attrTotalEps = doc.selectFirst("[data-total-eps]")?.attr("data-total-eps")?.toIntOrNull() ?: 0
+        val ldTotalEps = numEpsRegex.findAll(doc.html())
             .mapNotNull { it.groupValues[1].toIntOrNull() }
-            .maxOrNull()
+            .maxOrNull() ?: 0
+        var totalEps = maxOf(attrTotalEps, ldTotalEps)
 
-        if ((totalEps == null || totalEps <= 0) && explicitUrlByEp.isEmpty()) {
+        if (totalEps <= 0 && baseBolumUrl != url.substringBefore("?")) {
             val bolumDoc = runCatching { app.get(baseBolumUrl).document }.getOrNull()
-            totalEps = bolumDoc?.selectFirst("[data-total-eps]")?.attr("data-total-eps")?.toIntOrNull()
+            totalEps = bolumDoc?.selectFirst("[data-total-eps]")?.attr("data-total-eps")?.toIntOrNull() ?: 0
         }
 
         val maxExplicit = explicitUrlByEp.keys.maxOrNull() ?: 0
-        val finalCount = maxOf(totalEps ?: 0, maxExplicit)
+        val finalCount = maxOf(totalEps, maxExplicit)
 
         val episodes = when {
             finalCount > 0 -> (1..finalCount).map { ep ->
@@ -321,17 +322,50 @@ class Hdkore : MainAPI() {
             if (src.contains("youtube.com", true) || src.contains("youtu.be", true)) continue
             val cleanSrc = src.replace(" ", "%20")
 
-            if (cleanSrc.substringBefore("?").endsWith(".mp4", ignoreCase = true) ||
+            if (cleanSrc.contains("/player/api-player", ignoreCase = true)) {
+                val innerRaw = Regex("""[?&]url=([^&#]+)""").find(cleanSrc)?.groupValues?.get(1)
+                    ?.let { runCatching { URLDecoder.decode(it, "UTF-8").trim() }.getOrNull() }
+                if (!innerRaw.isNullOrBlank()) {
+                    val streamUrl = if (innerRaw.startsWith("http")) {
+                        innerRaw.replace(" ", "%20")
+                    } else {
+                        "$mainUrl/video/stream/${URLEncoder.encode(innerRaw, "UTF-8")}"
+                    }
+                    val subParam = Regex("""[?&]sub=([^&#]+)""").find(cleanSrc)?.groupValues?.get(1)
+                        ?.let { runCatching { URLDecoder.decode(it, "UTF-8").trim() }.getOrNull() }
+                    if (!subParam.isNullOrBlank()) {
+                        subtitleCallback.invoke(SubtitleFile("Türkçe", fixUrl(subParam)))
+                    }
+                    val isM3u8 = streamUrl.substringBefore("?").endsWith(".m3u8", ignoreCase = true)
+                    val reqHeaders = mapOf("Referer" to cleanSrc)
+                    wrappedCallback.invoke(
+                        newExtractorLink(
+                            source = this.name,
+                            name   = this.name,
+                            url    = streamUrl,
+                            type   = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                        ) {
+                            this.referer = cleanSrc
+                            this.headers = reqHeaders
+                            this.quality = Qualities.P1080.value
+                        }
+                    )
+                    continue
+                }
+            }
+
+            if (cleanSrc.contains("/video/stream/", ignoreCase = true) ||
+                cleanSrc.substringBefore("?").endsWith(".mp4", ignoreCase = true) ||
                 cleanSrc.substringBefore("?").endsWith(".m3u8", ignoreCase = true)
             ) {
-                val isMp4 = cleanSrc.substringBefore("?").endsWith(".mp4", ignoreCase = true)
+                val isM3u8 = cleanSrc.substringBefore("?").endsWith(".m3u8", ignoreCase = true)
                 val reqHeaders = mapOf("Referer" to "$mainUrl/")
                 wrappedCallback.invoke(
                     newExtractorLink(
                         source = this.name,
                         name   = this.name,
                         url    = cleanSrc,
-                        type   = if (isMp4) ExtractorLinkType.VIDEO else ExtractorLinkType.M3U8
+                        type   = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
                     ) {
                         this.referer = "$mainUrl/"
                         this.headers = reqHeaders

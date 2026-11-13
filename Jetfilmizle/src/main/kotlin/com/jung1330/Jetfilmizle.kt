@@ -314,7 +314,7 @@ class Jetfilmizle : MainAPI() {
         }
 
         val checkText = runCatching { app.get(streamUrl, headers = reqHeaders, verify = false).text }.getOrNull().orEmpty()
-        if (checkText.isNotBlank() && !checkText.contains("#EXTM3U") && !checkText.contains("#EXTINF")) {
+        if (!checkText.contains("#EXTM3U") && !checkText.contains("#EXTINF")) {
             return false
         }
 
@@ -539,9 +539,26 @@ class Jetfilmizle : MainAPI() {
                     app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).text
                 }.getOrNull() ?: return
 
-                val initial = extractJsonObjectAfter(html, "const initial")
+                var initial = extractJsonObjectAfter(html, "const initial")
                     ?: extractJsonObjectAfter(html, "initial")
                     ?: return
+
+                val wantsSub = !embedUrl.contains("dil=dublaj", ignoreCase = true) &&
+                    !label.contains("Dublaj", ignoreCase = true)
+                val code = initial.optString("code").trim()
+                if (wantsSub && initial.optString("lang").equals("dub", ignoreCase = true) && code.isNotBlank()) {
+                    val subJson = runCatching {
+                        JSONObject(
+                            app.get(
+                                "https://videopark.top/you/api.php?action=stream&v=${URLEncoder.encode(code, "UTF-8")}&lang=sub",
+                                headers = mapOf("Referer" to embedUrl, "X-Requested-With" to "XMLHttpRequest")
+                            ).text
+                        )
+                    }.getOrNull()
+                    if (subJson != null && subJson.optJSONArray("sources") != null) {
+                        initial = subJson
+                    }
+                }
 
                 emitJsonTracks(initial.optJSONArray("tracks"), embedUrl, seenSubs, subtitleCallback)
 

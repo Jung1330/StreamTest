@@ -124,7 +124,7 @@ class TRAnimeIzle : MainAPI() {
             .distinct()
 
         val episodeResponse = try {
-            app.get("$mainUrl/api/anime/$slug/episodes?limit=1000").parsedSafe<EpisodesResponse>()
+            app.get("$mainUrl/api/anime/$slug/episodes?limit=3000&offset=0").parsedSafe<EpisodesResponse>()
         } catch (t: Throwable) {
             Log.e("TRAnimeIzle", "Bölüm listesi alınamadı: ${t.message}")
             null
