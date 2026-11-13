@@ -2,12 +2,11 @@
 
 package com.jung1330
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.lagradost.cloudstream3.LoadResponse.Companion.addTrailer
 import com.lagradost.cloudstream3.utils.*
-import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
+import org.json.JSONObject
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
@@ -223,17 +222,6 @@ class Dizimag : MainAPI() {
         }
     }
 
-    private data class PilavyerSub(
-        @JsonProperty("lang") val lang: String? = null,
-        @JsonProperty("label") val label: String? = null,
-        @JsonProperty("src") val src: String? = null
-    )
-
-    private data class PilavyerConfig(
-        @JsonProperty("stream") val stream: String? = null,
-        @JsonProperty("subs") val subs: List<PilavyerSub>? = null
-    )
-
     override suspend fun loadLinks(
         data: String,
         isCasting: Boolean,
@@ -268,13 +256,19 @@ class Dizimag : MainAPI() {
                     .find(playerHtml)?.groupValues?.getOrNull(1)
 
                 if (!playerJsonStr.isNullOrBlank()) {
-                    val config = tryParseJson<PilavyerConfig>(playerJsonStr)
-                    val streamUrl = config?.stream?.takeIf { it.isNotBlank() }
+                    val config = runCatching { JSONObject(playerJsonStr) }.getOrNull()
+                    val streamUrl = config?.optString("stream")?.takeIf { it.isNotBlank() }
                     if (!streamUrl.isNullOrBlank()) {
-                        config.subs?.forEach { sub ->
-                            val subUrl = sub.src?.takeIf { it.isNotBlank() } ?: return@forEach
-                            val label = sub.label?.takeIf { it.isNotBlank() } ?: sub.lang ?: "Türkçe"
-                            subtitleCallback.invoke(SubtitleFile(label, subUrl))
+                        val subsArr = config.optJSONArray("subs")
+                        if (subsArr != null) {
+                            for (i in 0 until subsArr.length()) {
+                                val sub = subsArr.optJSONObject(i) ?: continue
+                                val subUrl = sub.optString("src").takeIf { it.isNotBlank() } ?: continue
+                                val label = sub.optString("label").takeIf { it.isNotBlank() }
+                                    ?: sub.optString("lang").takeIf { it.isNotBlank() }
+                                    ?: "Türkçe"
+                                subtitleCallback.invoke(SubtitleFile(label, subUrl))
+                            }
                         }
 
                         callback.invoke(

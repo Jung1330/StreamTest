@@ -3,11 +3,11 @@
 package com.jung1330
 
 import android.util.Base64
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.lagradost.cloudstream3.utils.*
-import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
+import org.json.JSONArray
+import org.json.JSONObject
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.security.MessageDigest
@@ -87,18 +87,6 @@ class Filmmodu : MainAPI() {
         }
     }
 
-    private data class SearchOneriItem(
-        @JsonProperty("title") val title: String? = null,
-        @JsonProperty("year") val year: Int? = null,
-        @JsonProperty("poster") val poster: String? = null,
-        @JsonProperty("url") val url: String? = null
-    )
-
-    private data class SearchOneriResponse(
-        @JsonProperty("films") val films: List<SearchOneriItem>? = null,
-        @JsonProperty("series") val series: List<SearchOneriItem>? = null
-    )
-
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun search(query: String): List<SearchResponse> {
@@ -120,33 +108,41 @@ class Filmmodu : MainAPI() {
             data = mapOf("q" to trimmed)
         ).text
 
-        val parsed = tryParseJson<SearchOneriResponse>(searchResp) ?: return emptyList()
+        val parsed = runCatching { JSONObject(searchResp) }.getOrNull() ?: return emptyList()
         val results = mutableListOf<SearchResponse>()
         val seen = LinkedHashSet<String>()
 
-        parsed.films?.forEach { item ->
-            val title = item.title?.trim()?.takeIf { it.isNotBlank() } ?: return@forEach
-            val url = fixUrlNull(item.url) ?: return@forEach
-            if (seen.add(url)) {
-                results.add(
-                    newMovieSearchResponse(title, url, TvType.Movie) {
-                        this.posterUrl = fixUrlNull(item.poster)
-                        this.year = item.year
-                    }
-                )
+        val filmsArr = parsed.optJSONArray("films")
+        if (filmsArr != null) {
+            for (i in 0 until filmsArr.length()) {
+                val item = filmsArr.optJSONObject(i) ?: continue
+                val title = item.optString("title").trim().takeIf { it.isNotBlank() } ?: continue
+                val url = fixUrlNull(item.optString("url")) ?: continue
+                if (seen.add(url)) {
+                    results.add(
+                        newMovieSearchResponse(title, url, TvType.Movie) {
+                            this.posterUrl = fixUrlNull(item.optString("poster"))
+                            this.year = item.optInt("year").takeIf { it > 0 }
+                        }
+                    )
+                }
             }
         }
 
-        parsed.series?.forEach { item ->
-            val title = item.title?.trim()?.takeIf { it.isNotBlank() } ?: return@forEach
-            val url = fixUrlNull(item.url) ?: return@forEach
-            if (seen.add(url)) {
-                results.add(
-                    newTvSeriesSearchResponse(title, url, TvType.TvSeries) {
-                        this.posterUrl = fixUrlNull(item.poster)
-                        this.year = item.year
-                    }
-                )
+        val seriesArr = parsed.optJSONArray("series")
+        if (seriesArr != null) {
+            for (i in 0 until seriesArr.length()) {
+                val item = seriesArr.optJSONObject(i) ?: continue
+                val title = item.optString("title").trim().takeIf { it.isNotBlank() } ?: continue
+                val url = fixUrlNull(item.optString("url")) ?: continue
+                if (seen.add(url)) {
+                    results.add(
+                        newTvSeriesSearchResponse(title, url, TvType.TvSeries) {
+                            this.posterUrl = fixUrlNull(item.optString("poster"))
+                            this.year = item.optInt("year").takeIf { it > 0 }
+                        }
+                    )
+                }
             }
         }
 
@@ -248,33 +244,6 @@ class Filmmodu : MainAPI() {
         }
     }
 
-    private data class PlayerSourceItem(
-        @JsonProperty("i") val i: Int? = null,
-        @JsonProperty("s") val s: String? = null,
-        @JsonProperty("y") val y: String? = null
-    )
-
-    private data class PxResponse(
-        @JsonProperty("u") val u: String? = null
-    )
-
-    private data class BePlayerCipher(
-        @JsonProperty("ct") val ct: String? = null,
-        @JsonProperty("iv") val iv: String? = null,
-        @JsonProperty("s") val s: String? = null
-    )
-
-    private data class BePlayerSubtitle(
-        @JsonProperty("file") val file: String? = null,
-        @JsonProperty("label") val label: String? = null,
-        @JsonProperty("language") val language: String? = null
-    )
-
-    private data class BePlayerDecrypted(
-        @JsonProperty("video_location") val videoLocation: String? = null,
-        @JsonProperty("strSubtitles") val strSubtitles: List<BePlayerSubtitle>? = null
-    )
-
     override suspend fun loadLinks(
         data: String,
         isCasting: Boolean,
@@ -287,13 +256,14 @@ class Filmmodu : MainAPI() {
         val dataKRaw = document.selectFirst("#f_player[data-k]")?.attr("data-k").orEmpty()
         if (dataKRaw.isBlank()) return false
 
-        val sources = tryParseJson<List<PlayerSourceItem>>(dataKRaw).orEmpty()
+        val sourcesArr = runCatching { JSONArray(dataKRaw) }.getOrNull() ?: return false
         var foundAny = false
 
-        for (src in sources) {
-            val idVal = src.i ?: continue
-            val sigVal = src.s?.takeIf { it.isNotBlank() } ?: continue
-            if (!src.y.isNullOrBlank()) continue // Skip YouTube trailers
+        for (idx in 0 until sourcesArr.length()) {
+            val src = sourcesArr.optJSONObject(idx) ?: continue
+            val idVal = src.optInt("i", -1).takeIf { it >= 0 } ?: continue
+            val sigVal = src.optString("s").takeIf { it.isNotBlank() } ?: continue
+            if (src.optString("y").isNotBlank()) continue // Skip YouTube trailers
 
             try {
                 val pxText = app.post(
@@ -311,7 +281,8 @@ class Filmmodu : MainAPI() {
                     )
                 ).text
 
-                val embedUrl = tryParseJson<PxResponse>(pxText)?.u?.takeIf { it.isNotBlank() } ?: continue
+                val embedUrl = runCatching { JSONObject(pxText).optString("u") }.getOrNull()
+                    ?.takeIf { it.isNotBlank() } ?: continue
                 if (extractEmbedStream(embedUrl, subtitleCallback, callback)) {
                     foundAny = true
                 }
@@ -342,14 +313,20 @@ class Filmmodu : MainAPI() {
                 val cipherJson = beMatch.groupValues[2]
                 val decryptedJson = decryptCryptoJsAes(pass, cipherJson)
                 if (!decryptedJson.isNullOrBlank()) {
-                    val beData = tryParseJson<BePlayerDecrypted>(decryptedJson)
-                    val videoLoc = beData?.videoLocation?.takeIf { it.isNotBlank() }
+                    val beData = runCatching { JSONObject(decryptedJson) }.getOrNull()
+                    val videoLoc = beData?.optString("video_location")?.takeIf { it.isNotBlank() }
                     if (!videoLoc.isNullOrBlank()) {
-                        beData.strSubtitles?.forEach { sub ->
-                            val rawSubFile = sub.file?.trim()?.takeIf { it.isNotBlank() } ?: return@forEach
-                            val subUrl = if (rawSubFile.startsWith("http")) rawSubFile else "$hostOrigin$rawSubFile"
-                            val label = sub.label?.takeIf { it.isNotBlank() } ?: sub.language ?: "Türkçe"
-                            subtitleCallback.invoke(SubtitleFile(label, subUrl))
+                        val subsArr = beData.optJSONArray("strSubtitles")
+                        if (subsArr != null) {
+                            for (i in 0 until subsArr.length()) {
+                                val sub = subsArr.optJSONObject(i) ?: continue
+                                val rawSubFile = sub.optString("file").trim().takeIf { it.isNotBlank() } ?: continue
+                                val subUrl = if (rawSubFile.startsWith("http")) rawSubFile else "$hostOrigin$rawSubFile"
+                                val label = sub.optString("label").takeIf { it.isNotBlank() }
+                                    ?: sub.optString("language").takeIf { it.isNotBlank() }
+                                    ?: "Türkçe"
+                                subtitleCallback.invoke(SubtitleFile(label, subUrl))
+                            }
                         }
 
                         callback.invoke(
@@ -382,10 +359,10 @@ class Filmmodu : MainAPI() {
 
     private fun decryptCryptoJsAes(passphrase: String, jsonPayload: String): String? {
         return try {
-            val cipherObj = tryParseJson<BePlayerCipher>(jsonPayload) ?: return null
-            val ctBase64 = cipherObj.ct ?: return null
-            val ivHex = cipherObj.iv ?: return null
-            val saltHex = cipherObj.s ?: return null
+            val cipherObj = runCatching { JSONObject(jsonPayload) }.getOrNull() ?: return null
+            val ctBase64 = cipherObj.optString("ct").takeIf { it.isNotBlank() } ?: return null
+            val ivHex = cipherObj.optString("iv").takeIf { it.isNotBlank() } ?: return null
+            val saltHex = cipherObj.optString("s").takeIf { it.isNotBlank() } ?: return null
 
             val ctBytes = Base64.decode(ctBase64, Base64.DEFAULT)
             val ivBytes = hexToBytes(ivHex)
