@@ -23,161 +23,48 @@ Fetching JAR: cloudstream.jar
 > Task :AnimeciX:generateDebugResValues
 > Task :AnimeciX:generateDebugResources
 > Task :AnimeciX:packageDebugResources
+> Task :Asyaanimeleri:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :Asyaanimeleri:preBuild UP-TO-DATE
+> Task :Asyaanimeleri:preDebugBuild UP-TO-DATE
+> Task :Asyaanimeleri:generateDebugResValues
+> Task :Asyaanimeleri:generateDebugResources
+> Task :Asyaanimeleri:packageDebugResources
 > Task :Dizibox:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :Dizibox:preBuild UP-TO-DATE
 > Task :Dizibox:preDebugBuild UP-TO-DATE
 > Task :Dizibox:generateDebugResValues
 > Task :Dizibox:generateDebugResources
 > Task :Dizibox:packageDebugResources
+> Task :AnimeciX:parseDebugLocalResources
+> Task :Asyaanimeleri:parseDebugLocalResources
+> Task :Dizibox:parseDebugLocalResources
 > Task :Dizilla:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :Dizilla:preBuild UP-TO-DATE
 > Task :Dizilla:preDebugBuild UP-TO-DATE
 > Task :Dizilla:generateDebugResValues
 > Task :Dizilla:generateDebugResources
-> Task :Dizibox:parseDebugLocalResources
-> Task :AnimeciX:parseDebugLocalResources
 > Task :Dizilla:packageDebugResources
-> Task :Diziwatch:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :Diziwatch:preBuild UP-TO-DATE
-> Task :Diziwatch:preDebugBuild UP-TO-DATE
+> Task :Asyaanimeleri:generateDebugRFile
 > Task :Dizibox:generateDebugRFile
 > Task :AnimeciX:generateDebugRFile
-> Task :Diziwatch:generateDebugResValues
 > Task :Dizilla:parseDebugLocalResources
-> Task :Diziwatch:generateDebugResources
 > Task :Dizilla:generateDebugRFile
-> Task :Diziwatch:packageDebugResources
-> Task :Diziwatch:parseDebugLocalResources
-> Task :Diziwatch:generateDebugRFile
-> Task :Dizilla:compileDebugKotlin
-> Task :Diziwatch:compileDebugKotlin
-> Task :AnimeciX:compileDebugKotlin
+
+> Task :Asyaanimeleri:compileDebugKotlin FAILED
+e: file:///home/runner/work/StreamTest/StreamTest/src/Asyaanimeleri/src/main/kotlin/com/jung1330/Asyaanimeleri.kt:230:30 Cannot inline bytecode built with JVM target 11 into bytecode that is being built with JVM target 1.8. Please specify proper '-jvm-target' option.
 
 > Task :Dizibox:compileDebugKotlin
-w: file:///home/runner/work/StreamTest/StreamTest/src/Dizibox/src/main/kotlin/com/jung1330/Dizibox.kt:263:37 'constructor(lang: String, url: String): SubtitleFile' is deprecated. Use newSubtitleFile method.
+w: file:///home/runner/work/StreamTest/StreamTest/src/Dizibox/src/main/kotlin/com/jung1330/Dizibox.kt:334:37 'constructor(lang: String, url: String): SubtitleFile' is deprecated. Use newSubtitleFile method.
 
-> Task :Dizilla:compileDex
-Compiled dex to /home/runner/work/StreamTest/StreamTest/src/Dizilla/build/intermediates/classes.dex
+> Task :Dizilla:compileDebugKotlin
+w: file:///home/runner/work/StreamTest/StreamTest/src/Dizilla/src/main/kotlin/com/jung1330/Dizilla.kt:229:45 'constructor(lang: String, url: String): SubtitleFile' is deprecated. Use newSubtitleFile method.
 
-> Task :AnimeciX:compileDex
-Compiled dex to /home/runner/work/StreamTest/StreamTest/src/AnimeciX/build/intermediates/classes.dex
-
-> Task :AnimeciX:generateManifest
-
-> Task :AnimeciX:make
-Made CloudStream package at /home/runner/work/StreamTest/StreamTest/src/AnimeciX/build/AnimeciX.cs3
-
-> Task :Dizibox:compileDex
-Compiled dex to /home/runner/work/StreamTest/StreamTest/src/Dizibox/build/intermediates/classes.dex
-
-> Task :Dizibox:generateManifest
-
-> Task :Dizibox:make
-Made CloudStream package at /home/runner/work/StreamTest/StreamTest/src/Dizibox/build/Dizibox.cs3
-
-> Task :Dizilla:generateManifest
-
-> Task :Dizilla:make
-Made CloudStream package at /home/runner/work/StreamTest/StreamTest/src/Dizilla/build/Dizilla.cs3
-
-> Task :Diziwatch:compileDex
-Compiled dex to /home/runner/work/StreamTest/StreamTest/src/Diziwatch/build/intermediates/classes.dex
-
-> Task :Diziwatch:generateManifest
-
-> Task :Diziwatch:make
-Made CloudStream package at /home/runner/work/StreamTest/StreamTest/src/Diziwatch/build/Diziwatch.cs3
-
-> Task :Diziyou:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :Diziyou:preBuild UP-TO-DATE
-> Task :Diziyou:preDebugBuild UP-TO-DATE
-> Task :Diziyou:generateDebugResValues
-> Task :Diziyou:generateDebugResources
-> Task :Diziyou:packageDebugResources
-> Task :Dramadizilerim:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :Dramadizilerim:preBuild UP-TO-DATE
-> Task :Dramadizilerim:preDebugBuild UP-TO-DATE
-> Task :Dramadizilerim:generateDebugResValues
-> Task :Diziyou:parseDebugLocalResources
-> Task :Dramadizilerim:generateDebugResources
-> Task :Diziyou:generateDebugRFile
-> Task :Dramadizilerim:packageDebugResources
-> Task :Filmmakinesi:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :Filmmakinesi:preBuild UP-TO-DATE
-> Task :Filmmakinesi:preDebugBuild UP-TO-DATE
-> Task :Filmmakinesi:generateDebugResValues
-> Task :Dramadizilerim:parseDebugLocalResources
-> Task :Filmmakinesi:generateDebugResources
-> Task :Dramadizilerim:generateDebugRFile
-> Task :Filmmakinesi:packageDebugResources
-> Task :Hdfilmcehennemi:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :Hdfilmcehennemi:preBuild UP-TO-DATE
-> Task :Hdfilmcehennemi:preDebugBuild UP-TO-DATE
-> Task :Filmmakinesi:parseDebugLocalResources
-> Task :Hdfilmcehennemi:generateDebugResValues
-> Task :Hdfilmcehennemi:generateDebugResources
-> Task :Filmmakinesi:generateDebugRFile
-> Task :Hdfilmcehennemi:packageDebugResources
-> Task :Hdfilmcehennemi:parseDebugLocalResources
-> Task :Hdfilmcehennemi:generateDebugRFile
-> Task :Diziyou:compileDebugKotlin
-
-> Task :Diziyou:compileDex
-Compiled dex to /home/runner/work/StreamTest/StreamTest/src/Diziyou/build/intermediates/classes.dex
-
-> Task :Diziyou:generateManifest
-
-> Task :Diziyou:make
-Made CloudStream package at /home/runner/work/StreamTest/StreamTest/src/Diziyou/build/Diziyou.cs3
-
-> Task :Hdkore:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :Hdkore:preBuild UP-TO-DATE
-> Task :Hdkore:preDebugBuild UP-TO-DATE
-> Task :Hdkore:generateDebugResValues
-> Task :Hdkore:generateDebugResources
-> Task :Dramadizilerim:compileDebugKotlin
-> Task :Hdkore:packageDebugResources
-
-> Task :Dramadizilerim:compileDex
-Compiled dex to /home/runner/work/StreamTest/StreamTest/src/Dramadizilerim/build/intermediates/classes.dex
-
-> Task :Dramadizilerim:generateManifest
-
-> Task :Dramadizilerim:make
-Made CloudStream package at /home/runner/work/StreamTest/StreamTest/src/Dramadizilerim/build/Dramadizilerim.cs3
-
-> Task :Jetfilmizle:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :Jetfilmizle:preBuild UP-TO-DATE
-> Task :Jetfilmizle:preDebugBuild UP-TO-DATE
-> Task :Jetfilmizle:generateDebugResValues
-> Task :Jetfilmizle:generateDebugResources
-> Task :Hdkore:parseDebugLocalResources
-> Task :Jetfilmizle:packageDebugResources
-> Task :Hdkore:generateDebugRFile
-> Task :Jetfilmizle:parseDebugLocalResources
-> Task :Jetfilmizle:generateDebugRFile
-
-> Task :Filmmakinesi:compileDebugKotlin
-w: file:///home/runner/work/StreamTest/StreamTest/src/Filmmakinesi/src/main/kotlin/com/jung1330/Filmmakinesi.kt:436:41 'constructor(lang: String, url: String): SubtitleFile' is deprecated. Use newSubtitleFile method.
-
-> Task :Hdkore:compileDebugKotlin
-w: file:///home/runner/work/StreamTest/StreamTest/src/Hdkore/src/main/kotlin/com/jung1330/Hdkore.kt:165:37 'constructor(lang: String, url: String): SubtitleFile' is deprecated. Use newSubtitleFile method.
-
-> Task :Jetfilmizle:compileDebugKotlin
-e: file:///home/runner/work/StreamTest/StreamTest/src/Jetfilmizle/src/main/kotlin/com/jung1330/Jetfilmizle.kt:345:13 Suspend function 'suspend fun newExtractorLink(source: String, name: String, url: String, type: ExtractorLinkType? = ..., initializer: suspend ExtractorLink.() -> Unit = ...): ExtractorLink' should be called only from a coroutine or another suspend function.
-
-> Task :Jetfilmizle:compileDebugKotlin FAILED
-
-> Task :Hdfilmcehennemi:compileDebugKotlin
-w: file:///home/runner/work/StreamTest/StreamTest/src/Hdfilmcehennemi/src/main/kotlin/com/jung1330/Hdfilmcehennemi.kt:489:41 'constructor(lang: String, url: String): SubtitleFile' is deprecated. Use newSubtitleFile method.
-
-> Task :Filmmakinesi:compileDex
-Compiled dex to /home/runner/work/StreamTest/StreamTest/src/Filmmakinesi/build/intermediates/classes.dex
+> Task :AnimeciX:compileDebugKotlin
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Execution failed for task ':Jetfilmizle:compileDebugKotlin'.
+Execution failed for task ':Asyaanimeleri:compileDebugKotlin'.
 > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
    > Compilation error. See log for more details
 
@@ -187,7 +74,7 @@ Execution failed for task ':Jetfilmizle:compileDebugKotlin'.
 > Get more help at https://help.gradle.org.
 
 * Exception is:
-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':Jetfilmizle:compileDebugKotlin'.
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':Asyaanimeleri:compileDebugKotlin'.
 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:130)
 	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:293)
 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:128)
@@ -378,5 +265,5 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilat
 	... 2 more
 
 
-BUILD FAILED in 1m 32s
-79 actionable tasks: 79 executed
+BUILD FAILED in 1m 5s
+24 actionable tasks: 24 executed
