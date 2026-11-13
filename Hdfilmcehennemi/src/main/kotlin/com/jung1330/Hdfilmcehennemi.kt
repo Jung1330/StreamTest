@@ -161,8 +161,14 @@ class Hdfilmcehennemi : MainAPI() {
 
         val title = rawTitle.substringBefore(" izle").substringBefore(" | ").trim()
 
+        // Site (2026-11) og:image / og:description etiketlerini kaldırdı; sayfadaki kapak/poster ve meta description'a düş.
         val poster = fixUrlNull(doc.selectFirst("meta[property='og:image']")?.attr("content"))
+            ?: fixUrlNull(
+                doc.selectFirst("img[data-src*='/images/list/poster/']")?.attr("data-src")
+                    ?: doc.selectFirst("img[data-src*='/images/list/cover/']")?.attr("data-src")
+            )
         val plot   = doc.selectFirst("meta[property='og:description']")?.attr("content")?.trim()
+            ?: doc.selectFirst("meta[name='description']")?.attr("content")?.trim()
         val year   = Regex("""\b(19|20)\d{2}\b""").find(title)?.value?.toIntOrNull()
         val tags   = doc.select("a[href*='/tur/'], a[href*='/kategori/']")
             .map { it.text().trim() }.filter { it.isNotEmpty() }.distinct()

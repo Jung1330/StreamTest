@@ -18,9 +18,9 @@ Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi s
   * Voe, Sibnet, Mail.ru, OK.ru, AnizmPlayer çoklu oynatıcı desteği ile 1080p Full HD yayın.
   * Sayfalanan "Anime Arşivi" ve "Son Bölümler" kategorileri, sezon/bölüm listeleme.
 * **TRAnimeİzle (`tranimeizle.live`):**
-  * "Son Eklenenler", "Popüler Animeler" ve "Son Bölümler" kategorileri (sayfalama destekli).
-  * Güncel ve popüler seriler için alternatif Türkçe anime akışı.
-  * Çoklu oynatıcı (iframe, video etiketi, JSON kaynak listesi) taraması.
+  * Site 2026-11'de Nuxt tabanlı yeni bir uygulamaya taşındı; eklenti artık sitenin JSON API'sini kullanıyor.
+  * "Son Eklenenler", "En Çok Beğenilenler" ve "Tamamlananlar" sıralamaları (limit/offset sayfalama).
+  * Katalog araması (`/api/search/catalog`), bölüm listesi ve **wid çerezli HLS** kaynak çözümü.
 * **HDFilmCehennemi (`hdfilmcehennemi.nl`):**
   * Film ve yabancı dizi kategorileri, yerel JSON + DuckDuckGo destekli arama.
   * Kendi oynatıcısındaki (`rplayer` / `CloseLoad`) şifreli yayın adresini çözer; çift sesli (TR Dublaj / Orijinal) birleşik (muxed) HLS akışları ile **izleme ve indirme** tam uyumlu.
@@ -36,9 +36,10 @@ Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi s
 * **KoreanTürk (`koreanturk.tv`):**
   * Kore dizileri, Kore filmleri ve BL dizileri arşivi (sayfalama destekli).
   * HintPlayer, VidMoly, OK.ru, Sibnet, VK çoklu oynatıcı ve indirme desteği.
-* **Dizilla (`dizilla.now`) & Diziyou (`diziyou.one`):**
+* **Dizilla (`dizilla.la`) & Diziyou (`diziyou.one`):**
   * Yabancı dizi arşivleri, sezon/bölüm listeleme, 1080p HLS yayın ve indirme uyumluluğu.
-* **HDKore (`hdkore.com`) & DramaDizilerim (`dramadizilerim.com`):**
+  * Dizilla'da **Pichive** oynatıcısı için **NP_GATE (SHA-256 proof-of-work)** çözümü eklendi.
+* **HDKore (`hdkore1.com`) & DramaDizilerim (`dramadizilerim1.com`):**
   * Asya & Kore dizileri, şifreli oynatıcı çözümü ve indirme uyumluluğu.
 
 ---

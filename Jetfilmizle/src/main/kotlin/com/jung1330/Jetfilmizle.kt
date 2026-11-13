@@ -616,6 +616,42 @@ class Jetfilmizle : MainAPI() {
                 }
             }
 
+            // Site (2026-11) TR kaynaklarını playerx.info oynatıcısına taşıdı; sayfa içindeki
+            // `initialPlayback` JSON'u HLS master adresini ve VTT altyazıları doğrudan taşıyor.
+            embedUrl.contains("playerx.info", ignoreCase = true) -> {
+                val html = runCatching {
+                    app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).text
+                }.getOrNull() ?: return
+
+                val playback = extractJsonObjectAfter(html, "initialPlayback")
+                if (playback == null) {
+                    loadExtractor(embedUrl, "$mainUrl/", subtitleCallback, callback)
+                    return
+                }
+                val item = playback.optJSONObject("item")
+
+                emitJsonTracks(item?.optJSONArray("tracks"), embedUrl, seenSubs, subtitleCallback)
+
+                val file = item?.optJSONArray("sources")?.optJSONObject(0)?.optString("file")
+                    ?.replace("\\/", "/")?.trim().orEmpty()
+                if (file.isBlank()) return
+
+                // Master listede ayrı EXT-X-MEDIA ses grupları var; varyantlara bölmeden master'ı ver.
+                val pxReferer = "https://playerx.info/"
+                callback.invoke(
+                    newExtractorLink(
+                        source = this.name,
+                        name   = linkName,
+                        url    = resolveRelativeUrl(embedUrl, file),
+                        type   = ExtractorLinkType.M3U8
+                    ) {
+                        this.referer = pxReferer
+                        this.headers = mapOf("Referer" to pxReferer)
+                        this.quality = Qualities.Unknown.value
+                    }
+                )
+            }
+
             embedUrl.contains("vidmoly", ignoreCase = true) -> {
                 if (!extractVidmoly(embedUrl, "$mainUrl/", linkName, seenSubs, subtitleCallback, callback)) {
                     loadExtractor(embedUrl, "$mainUrl/", subtitleCallback, callback)

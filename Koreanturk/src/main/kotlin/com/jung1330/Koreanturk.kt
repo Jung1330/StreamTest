@@ -68,11 +68,48 @@ class Koreanturk : MainAPI() {
             val img = box.selectFirst(".poster img, img")
             val poster = fixUrlNull(img?.attr("data-src")?.ifBlank { null } ?: img?.attr("src"))
                 ?.takeIf { !it.startsWith("data:") }
-            val year = box.selectFirst(".year, .release")?.text()?.let { txt ->
+            val year = box.selectFirst(".year, .release, .category")?.text()?.let { txt ->
                 Regex("""\b(19|20)\d{2}\b""").find(txt)?.value?.toIntOrNull()
             }
 
             if (href.contains("/dizi/") || box.hasClass("series-box")) {
+                out.add(
+                    newTvSeriesSearchResponse(title, href, TvType.AsianDrama) {
+                        this.posterUrl = poster
+                        this.year      = year
+                    }
+                )
+            } else {
+                out.add(
+                    newMovieSearchResponse(title, href, TvType.Movie) {
+                        this.posterUrl = poster
+                        this.year      = year
+                    }
+                )
+            }
+        }
+
+        // Kategori ("/dizi-kategori/", "/yapim/") sayfaları yeni "dz-card" kartlarını kullanıyor
+        doc.select("a.dz-card[href]").forEach { card ->
+            val href = fixUrlNull(card.attr("href")) ?: return@forEach
+            if (href.contains("/dizi-kategori/") || href.contains("/yapim/") || href.contains("/oyuncu/")) {
+                return@forEach
+            }
+
+            val rawTitle = card.selectFirst(".dz-title")?.text()?.trim().orEmpty()
+                .ifBlank { card.attr("title").trim() }
+                .ifBlank { card.selectFirst("img")?.attr("alt")?.trim().orEmpty() }
+
+            val title = cleanTitle(rawTitle)
+            if (title.isBlank()) return@forEach
+
+            val poster = fixUrlNull(card.selectFirst("img")?.attr("src"))
+                ?.takeIf { !it.startsWith("data:") }
+            val year = card.selectFirst(".dz-year")?.text()?.trim()?.let { txt ->
+                Regex("""\b(19|20)\d{2}\b""").find(txt)?.value?.toIntOrNull()
+            }
+
+            if (href.contains("/dizi/")) {
                 out.add(
                     newTvSeriesSearchResponse(title, href, TvType.AsianDrama) {
                         this.posterUrl = poster
@@ -124,9 +161,9 @@ class Koreanturk : MainAPI() {
                 ?: doc.selectFirst(".movie-left .poster img, .poster img")
                     ?.let { it.attr("data-src").ifBlank { it.attr("src") } }
         )
-        val plot = doc.selectFirst(".movies-data .desc, .movies-data p")?.text()?.trim()?.ifBlank { null }
+        val plot = doc.selectFirst(".movies-data .desc, .movies-data .description, .movies-data p")?.text()?.trim()?.ifBlank { null }
             ?: doc.selectFirst("meta[property='og:description']")?.attr("content")?.trim()
-        val year = doc.selectFirst("li.release a, .release a")?.text()?.trim()?.let { txt ->
+        val year = doc.selectFirst("li.release a, li.release, .release a")?.text()?.trim()?.let { txt ->
             Regex("""\b(19|20)\d{2}\b""").find(txt)?.value?.toIntOrNull()
         }
         val tags = doc.select(".movies-data .category a, .category a")

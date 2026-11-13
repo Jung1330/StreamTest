@@ -1,9 +1,9 @@
-version = 2
+version = 3
 
 cloudstream {
     authors     = listOf("Jung1330", "StreamTest", "AI-Assistant")
     language    = "tr"
-    description = "StreamTest - Dizilla Yabancı Dizi Eklentisi (Pichive oynatıcı, 1080p HLS)."
+    description = "StreamTest - Dizilla Yabancı Dizi Eklentisi (Pichive gate + 1080p HLS)."
 
     /**
      * Status int as the following:
@@ -14,5 +14,5 @@ cloudstream {
     **/
     status  = 1
     tvTypes = listOf("TvSeries")
-    iconUrl = "https://www.google.com/s2/favicons?domain=dizilla.now&sz=%size%"
+    iconUrl = "https://www.google.com/s2/favicons?domain=dizilla.la&sz=%size%"
 }

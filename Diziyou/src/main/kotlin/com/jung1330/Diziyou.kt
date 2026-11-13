@@ -66,6 +66,10 @@ class Diziyou : MainAPI() {
 
         // 2) Ana sayfa son bölümler ve diğer bağlantılar
         doc.select("a[href]").forEach { a ->
+            // Her sayfada basılan alfabetik "tüm diziler" indeksi (ul.alphabetical-category-list, ~1173 link)
+            // sonuç listesini tamamen kirletiyor; bu indeksteki bağlantıları atla.
+            if (a.parents().any { it.hasClass("alphabetical-category-list") }) return@forEach
+
             val href = fixUrlNull(a.attr("href")) ?: return@forEach
             if (!href.startsWith("$mainUrl/")) return@forEach
 

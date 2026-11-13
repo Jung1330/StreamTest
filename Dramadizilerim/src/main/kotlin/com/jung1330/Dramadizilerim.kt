@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document
 import java.net.URLEncoder
 
 class Dramadizilerim : MainAPI() {
-    override var mainUrl              = "https://dramadizilerim.com"
+    override var mainUrl              = "https://dramadizilerim1.com"
     override var name                 = "Drama Dizilerim"
     override val hasMainPage          = true
     override var lang                 = "tr"

@@ -7,9 +7,10 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.json.JSONObject
 import java.net.URLEncoder
+import java.security.MessageDigest
 
 class Dizilla : MainAPI() {
-    override var mainUrl              = "https://dizilla.now"
+    override var mainUrl              = "https://dizilla.la"
     override var name                 = "Dizilla"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -20,11 +21,15 @@ class Dizilla : MainAPI() {
         "$mainUrl/" to "Son Eklenenler"
     )
 
-    private val seriesHref   = Regex("""^/dizi/([a-z0-9\-]+)$""")
-    private val episodeUrl   = Regex("""https://dizilla\.now/[a-z0-9\-]+?-(\d+)-sezon-(\d+)-bolum""")
+    private val seriesHref   = Regex("""^/dizi/([a-z0-9\-]+)/?$""")
+    private val episodeHref  = Regex("""/([a-z0-9\-]+?)-(\d+)-sezon-(\d+)-bolum""")
     private val reserved     = setOf("dizi", "tum-bolumler", "arama", "giris", "kayit")
+    private val iframeRegex  = Regex("""https?://[^"'\s\\]+?/iframe\.php\?v=[A-Za-z0-9_\-]+""")
+    private val gateConstRx  = Regex("""String\.fromCharCode\(([\d,\s]+)\)""")
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        if (page > 1) return newHomePageResponse(request.name, emptyList())
+
         val doc = app.get(request.data).document
         val out = mutableListOf<SearchResponse>()
 
@@ -74,27 +79,44 @@ class Dizilla : MainAPI() {
     override suspend fun load(url: String): LoadResponse? {
         val html = app.get(url).text
 
+        val doc = org.jsoup.Jsoup.parse(html)
         val title = runCatching {
-            val doc = org.jsoup.Jsoup.parse(html)
             (doc.selectFirst("meta[property='og:title']")?.attr("content")
                 ?: doc.selectFirst("h1")?.text())
                 ?.substringBefore(" izle")?.substringBefore(" İzle")?.substringBefore(" | ")?.trim()
-        }.getOrNull() ?: return null
+        }.getOrNull()?.takeIf { it.isNotBlank() } ?: return null
 
-        val doc     = org.jsoup.Jsoup.parse(html)
         val poster  = fixUrlNull(doc.selectFirst("meta[property='og:image']")?.attr("content"))
         val plot    = doc.selectFirst("meta[name='description']")?.attr("content")?.trim()
 
-        val episodes = episodeUrl.findAll(html).mapNotNull { m ->
-            val season  = m.groupValues[1].toIntOrNull() ?: return@mapNotNull null
-            val episode = m.groupValues[2].toIntOrNull() ?: return@mapNotNull null
+        // Bölüm listesi JSON-LD / Next.js verisi içinde "slug-3-sezon-1-bolum" biçiminde geçiyor.
+        val unescaped = html.replace("\\\"", "\"")
+        var episodes = episodeHref.findAll(unescaped).mapNotNull { m ->
+            val season  = m.groupValues[2].toIntOrNull() ?: return@mapNotNull null
+            val episode = m.groupValues[3].toIntOrNull() ?: return@mapNotNull null
+            val path    = m.value.trimEnd('/')
 
-            newEpisode(m.value) {
+            newEpisode(fixUrl(path)) {
                 this.name    = "$season. Sezon $episode. Bölüm"
                 this.season  = season
                 this.episode = episode
             }
         }.distinctBy { it.data }.sortedWith(compareBy({ it.season }, { it.episode })).toList()
+
+        // Yedek: sayfadaki doğrudan bağlantılar
+        if (episodes.isEmpty()) {
+            episodes = doc.select("a[href*='-sezon-']").mapNotNull { a ->
+                val href = a.attr("href").trim()
+                val m = episodeHref.find(href) ?: return@mapNotNull null
+                val season  = m.groupValues[2].toIntOrNull() ?: return@mapNotNull null
+                val episode = m.groupValues[3].toIntOrNull() ?: return@mapNotNull null
+                newEpisode(fixUrl(href.substringBefore("?"))) {
+                    this.name    = "$season. Sezon $episode. Bölüm"
+                    this.season  = season
+                    this.episode = episode
+                }
+            }.distinctBy { it.data }.sortedWith(compareBy({ it.season }, { it.episode })).toList()
+        }
 
         return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
             this.posterUrl = poster
@@ -102,7 +124,7 @@ class Dizilla : MainAPI() {
         }
     }
 
-    /** Pichive oynatıcısındaki NP_CONFIG içinden HLS master adresini çıkarır. */
+    /** Pichive oynatıcısındaki NP_CONFIG içinden JSON nesnesini çıkarır. */
     private fun extractConfig(html: String): JSONObject? {
         val marker = "NP_CONFIG"
         val idx    = html.indexOf(marker)
@@ -134,6 +156,38 @@ class Dizilla : MainAPI() {
         return runCatching { JSONObject(html.substring(start, end + 1)) }.getOrNull()
     }
 
+    /** Pichive NP_GATE: SHA-256(n|sabit|gate) 6. kelimesinin ilk b biti sıfır olan base36 nonce. */
+    private fun gateNonce(gate: String, bits: Int, constant: String): String {
+        val b    = bits.coerceIn(1, 31)
+        val md   = MessageDigest.getInstance("SHA-256")
+        val tail = "|$constant|$gate"
+
+        for (n in 0 until 3_000_000) {
+            val candidate = n.toString(36)
+            val digest    = md.digest((candidate + tail).toByteArray(Charsets.UTF_8))
+            val word = ((digest[24].toInt() and 0xFF) shl 24) or
+                       ((digest[25].toInt() and 0xFF) shl 16) or
+                       ((digest[26].toInt() and 0xFF) shl 8) or
+                       (digest[27].toInt() and 0xFF)
+
+            if ((word ushr (32 - b)) == 0) return candidate
+        }
+        return ""
+    }
+
+    /** İframe HTML'inden NP_GATE sabitini ("RT6Px-k_Tv" gibi) okur. */
+    private fun gateConstant(html: String): String {
+        val raw = gateConstRx.find(html)?.groupValues?.get(1).orEmpty()
+        if (raw.isBlank()) return "RT6Px-k_Tv"
+
+        val text = raw.split(',')
+            .mapNotNull { it.trim().toIntOrNull() }
+            .map { it.toChar() }
+            .joinToString("")
+
+        return text.ifBlank { "RT6Px-k_Tv" }
+    }
+
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val pageHtml = try {
             app.get(data).text
@@ -142,40 +196,74 @@ class Dizilla : MainAPI() {
             return false
         }
 
-        val config = extractConfig(pageHtml)
-        if (config == null) {
-            Log.e("Dizilla", "NP_CONFIG bulunamadı: $data")
-            return false
-        }
+        val unescaped = pageHtml.replace("\\\"", "\"")
+        val iframes = iframeRegex.findAll(unescaped).map { it.value }.distinct().toList()
+            .ifEmpty { listOf(data) }
 
-        val sources = config.optJSONArray("sources") ?: return false
         var emitted = false
 
-        for (i in 0 until sources.length()) {
-            val source = sources.optJSONObject(i) ?: continue
-            val master = source.optString("master").trim()
-            if (master.isBlank()) continue
-
-            val referer = "$mainUrl/"
-            val reqHeaders = mapOf("Referer" to referer)
-            val links = try {
-                M3u8Helper.generateM3u8(this.name, master, referer, headers = reqHeaders)
-            } catch (t: Throwable) {
-                emptyList()
+        for (iframe in iframes) {
+            val iframeHtml = if (iframe == data) {
+                unescaped
+            } else {
+                runCatching {
+                    app.get(iframe, headers = mapOf("Referer" to data)).text
+                }.getOrNull() ?: continue
             }
 
-            if (links.isNotEmpty()) {
-                links.forEach { callback.invoke(it) }
-                emitted = true
-            } else {
+            val config = extractConfig(iframeHtml) ?: continue
+
+            val gate     = config.optJSONObject("gate")
+            val gateN    = gate?.optString("n").orEmpty()
+            val gateBits = gate?.optInt("b", 12) ?: 12
+            val suffix   = if (gateN.isNotBlank()) {
+                "&p=" + gateNonce(gateN, gateBits, gateConstant(iframeHtml))
+            } else ""
+
+            val subtitles = config.optJSONArray("subtitles")
+            if (subtitles != null) {
+                for (i in 0 until subtitles.length()) {
+                    val sub = subtitles.optJSONObject(i) ?: continue
+                    val subUrl = fixUrlNull(sub.optString("url")) ?: continue
+                    val label  = sub.optString("label").ifBlank { sub.optString("lang") }.ifBlank { "TR" }
+                    subtitleCallback.invoke(SubtitleFile(label, subUrl + suffix))
+                }
+            }
+
+            val sources = config.optJSONArray("sources") ?: continue
+            val iframeOrigin = iframe.substringBefore("/iframe.php")
+            val reqHeaders = mapOf("Referer" to iframe, "Origin" to iframeOrigin)
+
+            for (i in 0 until sources.length()) {
+                val source = sources.optJSONObject(i) ?: continue
+                if (source.optBoolean("trailer", false)) continue
+
+                val master = source.optString("master").trim()
+                if (master.isBlank()) continue
+
+                val masterUrl = master + suffix
+                val sourceName = source.optString("title").ifBlank { this.name }
+                val label = if (sourceName == this.name) this.name else "${this.name} • $sourceName"
+
+                // Master erişilebilir mi? Oynatıcıya verilecek adres doğrulanmış oluyor.
+                val ok = runCatching {
+                    val body = app.get(masterUrl, headers = reqHeaders).text
+                    body.contains("#EXTM3U") || body.contains("#EXTINF")
+                }.getOrDefault(false)
+
+                if (!ok) {
+                    Log.e("Dizilla", "Master yayın doğrulanamadı: $sourceName")
+                    continue
+                }
+
                 callback.invoke(
                     newExtractorLink(
                         source = this.name,
-                        name   = this.name,
-                        url    = master,
+                        name   = label,
+                        url    = masterUrl,
                         type   = ExtractorLinkType.M3U8
                     ) {
-                        this.referer = referer
+                        this.referer = iframe
                         this.headers = reqHeaders
                         this.quality = Qualities.Unknown.value
                     }
