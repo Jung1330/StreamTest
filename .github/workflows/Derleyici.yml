@@ -40,6 +40,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
 
       - name: Android SDK Ayarla
         uses: android-actions/setup-android@v4
@@ -49,7 +50,7 @@ jobs:
           cd $GITHUB_WORKSPACE/src
           chmod +x gradlew
           set -o pipefail
-          ./gradlew make makePluginsJson --stacktrace 2>&1 | tee /tmp/build.log
+          (./gradlew make makePluginsJson --stacktrace || ./gradlew make makePluginsJson --stacktrace --refresh-dependencies) 2>&1 | tee /tmp/build.log
           find . -name "*.cs3" -exec cp {} $GITHUB_WORKSPACE/builds/ \;
           cp build/plugins.json $GITHUB_WORKSPACE/builds/
 
