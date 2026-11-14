@@ -378,7 +378,7 @@ Required by:
     root project :
 
 
-BUILD FAILED in 30s
+BUILD FAILED in 29s
 
 FAILURE: Build failed with an exception.
 
@@ -744,4 +744,4 @@ Required by:
     root project :
 
 
-BUILD FAILED in 6s
+BUILD FAILED in 5s
