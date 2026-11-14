@@ -1,6 +1,6 @@
 {
     "name": "StreamTest",
-    "description": "StreamTest - 16 Türkçe anime & dizi eklentisi (AnimeciX, Diziwatch, TRAnimeİzle, HDFilmCehennemi, FilmMakinesi, DiziBOX, JetFilmizle, KoreanTürk, Dizilla, Diziyou, HDKore, DramaDizilerim, Webdramaturkey, Dizimag, Filmmodu, Asyaanimeleri)",
+    "description": "StreamTest - Türkçe anime & dizi eklentisi",
     "manifestVersion": 1,
     "pluginLists": [
       "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/plugins.json"
