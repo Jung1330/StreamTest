@@ -159,6 +159,7 @@ class Dizilla : MainAPI() {
     /**
      * Pichive NP_GATE (sitedeki window.NP_GATE): ondalık nonce + "|" + sabit + "|" + gate
      * SHA-256'sının 3. 32-bit kelimesinin (byte 8..11) alt 12 biti sıfır olmalı.
+     * 2026-11-14: site bu kuralı değiştirdi (önceden base36 nonce + 6. kelime + üst bitlerdi).
      */
     private fun gateNonce(gate: String, constant: String): String {
         val md   = MessageDigest.getInstance("SHA-256")
