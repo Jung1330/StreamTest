@@ -54,7 +54,7 @@ class Dizilla : MainAPI() {
     override suspend fun search(query: String): List<SearchResponse> {
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = try {
-            app.get("$mainUrl/?s=$encoded").document
+            app.get("$mainUrl/ara?q=$encoded").document
         } catch (t: Throwable) {
             Log.e("Dizilla", "Arama hatası: ${t.message}")
             return emptyList()
@@ -156,21 +156,23 @@ class Dizilla : MainAPI() {
         return runCatching { JSONObject(html.substring(start, end + 1)) }.getOrNull()
     }
 
-    /** Pichive NP_GATE: SHA-256(n|sabit|gate) 6. kelimesinin ilk b biti sıfır olan base36 nonce. */
-    private fun gateNonce(gate: String, bits: Int, constant: String): String {
-        val b    = bits.coerceIn(1, 31)
+    /**
+     * Pichive NP_GATE (sitedeki window.NP_GATE): ondalık nonce + "|" + sabit + "|" + gate
+     * SHA-256'sının 3. 32-bit kelimesinin (byte 8..11) alt 12 biti sıfır olmalı.
+     */
+    private fun gateNonce(gate: String, constant: String): String {
         val md   = MessageDigest.getInstance("SHA-256")
         val tail = "|$constant|$gate"
 
         for (n in 0 until 3_000_000) {
-            val candidate = n.toString(36)
+            val candidate = n.toString()
             val digest    = md.digest((candidate + tail).toByteArray(Charsets.UTF_8))
-            val word = ((digest[24].toInt() and 0xFF) shl 24) or
-                       ((digest[25].toInt() and 0xFF) shl 16) or
-                       ((digest[26].toInt() and 0xFF) shl 8) or
-                       (digest[27].toInt() and 0xFF)
+            val word = ((digest[8].toInt() and 0xFF) shl 24) or
+                       ((digest[9].toInt() and 0xFF) shl 16) or
+                       ((digest[10].toInt() and 0xFF) shl 8) or
+                       (digest[11].toInt() and 0xFF)
 
-            if ((word ushr (32 - b)) == 0) return candidate
+            if ((word and 0xFFF) == 0) return candidate
         }
         return ""
     }
@@ -215,9 +217,8 @@ class Dizilla : MainAPI() {
 
             val gate     = config.optJSONObject("gate")
             val gateN    = gate?.optString("n").orEmpty()
-            val gateBits = gate?.optInt("b", 12) ?: 12
             val suffix   = if (gateN.isNotBlank()) {
-                "&p=" + gateNonce(gateN, gateBits, gateConstant(iframeHtml))
+                "&p=" + gateNonce(gateN, gateConstant(iframeHtml))
             } else ""
 
             val subtitles = config.optJSONArray("subtitles")

@@ -404,8 +404,16 @@ class Filmmakinesi : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        // Site (2026-11) gömme (embed) sayfalarını sadece iframe bağlamında sunuyor:
+        // Sec-Fetch-Dest başlığı yoksa "Uygulama desteklenmiyor" 404'ü dönüyor.
         val html = try {
-            app.get(embedUrl, headers = mapOf("Referer" to "$mainUrl/")).text
+            app.get(
+                embedUrl,
+                headers = mapOf(
+                    "Referer"        to "$mainUrl/",
+                    "Sec-Fetch-Dest" to "iframe"
+                )
+            ).text
         } catch (t: Throwable) {
             return false
         }

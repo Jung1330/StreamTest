@@ -31,7 +31,7 @@ class Dizimag : MainAPI() {
         "$mainUrl/platform/amazon-prime" to "Amazon Prime Yapımları",
         "$mainUrl/platform/apple-tv" to "Apple TV+ Yapımları",
         "$mainUrl/tur/aksiyon" to "Aksiyon",
-        "$mainUrl/tur/bilim-kurgu-fantazi" to "Bilim Kurgu & Fantazi",
+        "$mainUrl/tur/bilim-kurgu-fantastik" to "Bilim Kurgu & Fantastik",
         "$mainUrl/tur/dram" to "Dram"
     )
 
@@ -133,9 +133,16 @@ class Dizimag : MainAPI() {
         val year = Regex(""""(?:startDate|datePublished)"\s*:\s*"(\d{4})""")
             .find(fullLdJson)?.groupValues?.getOrNull(1)?.toIntOrNull()
 
-        val tags = document.select("a[href*='/tur/']").mapNotNull {
-            it.text().trim().takeIf { t -> t.isNotBlank() }
-        }.distinct()
+        val tags = Regex(""""genre"\s*:\s*\[([^\]]*)]""")
+            .find(fullLdJson)?.groupValues?.getOrNull(1)
+            ?.let { raw -> Regex(""""([^"]+)"""").findAll(raw).map { it.groupValues[1] }.toList() }
+            .orEmpty()
+            .ifEmpty {
+                document.select("a.rounded-badge[href*='/tur/']").mapNotNull {
+                    it.text().trim().takeIf { t -> t.isNotBlank() }
+                }
+            }
+            .distinct()
 
         val actorNames = Regex(""""@type"\s*:\s*"Person"\s*,\s*"name"\s*:\s*"([^"]+)"""")
             .findAll(fullLdJson)

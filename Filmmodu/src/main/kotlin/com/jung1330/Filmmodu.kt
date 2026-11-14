@@ -58,7 +58,38 @@ class Filmmodu : MainAPI() {
                 results.add(item)
             }
         }
+
+        // /trend-filmler sayfası farklı kart şablonu kullanır: article.tr-vitrin (1. sıra) + li.tr-oge
+        document.select("article.tr-vitrin, li.tr-oge").forEach { card ->
+            val item = card.toTrendSearchResult() ?: return@forEach
+            if (seen.add(item.url)) {
+                results.add(item)
+            }
+        }
         return results
+    }
+
+    private fun Element.toTrendSearchResult(): SearchResponse? {
+        val linkEl = selectFirst("h2 a[href], h3 a[href]") ?: return null
+        val url = fixUrlNull(linkEl.attr("href")) ?: return null
+        if (!url.contains("/film/") && !url.contains("/dizi/")) return null
+
+        val title = linkEl.text().trim().ifBlank {
+            selectFirst(".tr-afis, .tr-vitrin-afis")?.attr("title")
+                ?.replace(Regex("""\s*izle.*""", RegexOption.IGNORE_CASE), "")?.trim().orEmpty()
+        }
+        if (title.isBlank()) return null
+
+        val posterUrl = fixUrlNull(
+            selectFirst(".tr-vitrin-afis img, .tr-afis img")?.attr("src")
+        )
+        val year = select(".tr-chip").firstOrNull { it.text().trim().matches(Regex("""\d{4}""")) }
+            ?.text()?.trim()?.toIntOrNull()
+
+        return newMovieSearchResponse(title, url, TvType.Movie) {
+            this.posterUrl = posterUrl
+            this.year = year
+        }
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
@@ -175,11 +206,11 @@ class Filmmodu : MainAPI() {
             ?.replace("\\n", "\n")
             ?: document.selectFirst("meta[name=description]")?.attr("content")?.trim()
 
-        val year = Regex(""""dateCreated"\s*:\s*"(\d{4})""")
+        val year = Regex(""""(?:dateCreated|startDate)"\s*:\s*"(\d{4})""")
             .find(ldJson)?.groupValues?.getOrNull(1)?.toIntOrNull()
             ?: Regex("""\((\d{4})\)""").find(document.title())?.groupValues?.getOrNull(1)?.toIntOrNull()
 
-        val tags = document.select("a[href*='/filmizle/'], a[href*='/tur/']").mapNotNull {
+        val tags = document.select("div.fl-kunye a[href*='/filmizle/'], div.fl-kunye a[href*='/tur/']").mapNotNull {
             it.text().trim().takeIf { t -> t.isNotBlank() && !t.contains("Filmleri", ignoreCase = true) }
         }.ifEmpty {
             Regex(""""genre"\s*:\s*\[(.*?)]""").find(ldJson)?.groupValues?.getOrNull(1)

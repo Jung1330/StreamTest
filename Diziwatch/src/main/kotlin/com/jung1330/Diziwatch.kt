@@ -6,6 +6,7 @@ import android.util.Log
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.json.JSONArray
+import org.json.JSONObject
 import java.net.URLEncoder
 
 class Diziwatch : MainAPI() {
@@ -134,6 +135,51 @@ class Diziwatch : MainAPI() {
         }
     }
 
+    /**
+     * anizmplayer.com sitenin birincil oynatıcısıdır ve uygulamada bu host için extractor yoktur.
+     * FirePlayer API'si (POST /player/index.php?data=<hash>&do=getVideo) HLS master URL'ini döner.
+     */
+    private suspend fun extractAnizm(videoUrl: String, callback: (ExtractorLink) -> Unit): Boolean {
+        val hash = Regex("""/video/([a-f0-9]{32})""", RegexOption.IGNORE_CASE)
+            .find(videoUrl)?.groupValues?.getOrNull(1) ?: return false
+        val origin = "https://anizmplayer.com"
+
+        val body = try {
+            app.post(
+                "$origin/player/index.php?data=$hash&do=getVideo",
+                headers = mapOf(
+                    "X-Requested-With" to "XMLHttpRequest",
+                    "Referer"          to videoUrl,
+                    "Origin"           to origin
+                ),
+                data = mapOf("hash" to hash, "r" to "$mainUrl/")
+            ).text
+        } catch (t: Throwable) {
+            Log.e("Diziwatch", "anizmplayer isteği başarısız: ${t.message}")
+            return false
+        }
+
+        val obj = runCatching { JSONObject(body.trim()) }.getOrNull() ?: return false
+        val stream = obj.optString("videoSource").trim()
+            .ifBlank { obj.optString("securedLink").trim() }
+        if (!stream.startsWith("http")) return false
+
+        val reqHeaders = mapOf("Referer" to "$origin/")
+        callback.invoke(
+            newExtractorLink(
+                source = this.name,
+                name   = this.name,
+                url    = stream,
+                type   = ExtractorLinkType.M3U8
+            ) {
+                this.referer = "$origin/"
+                this.headers = reqHeaders
+                this.quality = Qualities.P1080.value
+            }
+        )
+        return true
+    }
+
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val html = try {
             app.get(data).text
@@ -174,6 +220,12 @@ class Diziwatch : MainAPI() {
             if (videoUrl.contains("google") || videoUrl.contains("doubleclick") || videoUrl.contains("/ads")) continue
 
             Log.d("Diziwatch", "Oynatıcı » $videoUrl")
+
+            // Sitenin birincil oynatıcısı: extractor bulunmadığı için doğrudan çözülür.
+            if (videoUrl.contains("anizmplayer.com", ignoreCase = true) && extractAnizm(videoUrl, callback)) {
+                loaded = true
+                continue
+            }
 
             if (videoUrl.matches(Regex(""".*\.(m3u8|mp4)(\?.*)?$""", RegexOption.IGNORE_CASE))) {
                 val referer = "$mainUrl/"
