@@ -10,7 +10,7 @@ import org.jsoup.nodes.Element
 import java.net.URLEncoder
 
 class Diziyou : MainAPI() {
-    override var mainUrl              = "https://www.diziyou.one"
+    override var mainUrl              = "https://www.diziyou.love"
     override var name                 = "Diziyou"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -23,7 +23,7 @@ class Diziyou : MainAPI() {
     )
 
     private val reserved = setOf(
-        "dizi-arsivi", "uye-ol", "iletisim", "gizlilik", "dmca", "hakkimizda",
+        "dizi-arsivi", "son-eklenenler", "uye-ol", "iletisim", "gizlilik", "dmca", "hakkimizda",
         "page", "category", "tag", "feed", "wp-login"
     )
     private val seasonRegex = Regex("""(\d+)-sezon-(\d+)-bolum""")
@@ -42,8 +42,8 @@ class Diziyou : MainAPI() {
     private fun parseSeriesItems(doc: Document): List<SearchResponse> {
         val byUrl = linkedMapOf<String, SearchResponse>()
 
-        // 1) Dizi Arşivi ve Arama kartları (.single-item)
-        doc.select("div.single-item").forEach { item ->
+        // 1) Dizi Arşivi (.single-item), Arama sayfası (#list-series) ve AJAX arama (#searchelement) kartları
+        doc.select("div.single-item, div#list-series, div#searchelement").forEach { item ->
             val linkEl = item.selectFirst("#categorytitle a[href], .cat-img a[href], a[href]") ?: return@forEach
             val href = fixUrlNull(linkEl.attr("href")) ?: return@forEach
             if (!href.startsWith("$mainUrl/")) return@forEach
@@ -53,6 +53,7 @@ class Diziyou : MainAPI() {
             if (slug.isBlank() || slug in reserved || slug.contains("/")) return@forEach
 
             val title = item.selectFirst("#categorytitle a")?.text()?.trim().orEmpty()
+                .ifBlank { item.select("a[href]").firstOrNull { it.text().isNotBlank() }?.text()?.trim().orEmpty() }
                 .ifBlank { linkEl.attr("title").substringBefore(" izle").trim() }
                 .ifBlank { slug.replace('-', ' ').replaceFirstChar { it.uppercase() } }
 
@@ -105,14 +106,28 @@ class Diziyou : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val encoded = URLEncoder.encode(query.trim(), "UTF-8")
-        val doc = try {
-            app.get("$mainUrl/?s=$encoded").document
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return emptyList()
+
+        val ajaxItems = runCatching {
+            val ajaxDoc = app.post(
+                "$mainUrl/wp-admin/admin-ajax.php",
+                headers = mapOf("X-Requested-With" to "XMLHttpRequest", "Referer" to "$mainUrl/"),
+                data = mapOf("action" to "data_fetch", "keyword" to trimmed)
+            ).document
+            parseSeriesItems(ajaxDoc)
+        }.getOrNull().orEmpty()
+
+        val encoded = URLEncoder.encode(trimmed, "UTF-8")
+        val pageItems = try {
+            val doc = app.get("$mainUrl/?s=$encoded").document
+            parseSeriesItems(doc)
         } catch (t: Throwable) {
             Log.e("Diziyou", "Arama hatası: ${t.message}")
-            return emptyList()
+            emptyList()
         }
-        return parseSeriesItems(doc)
+
+        return (ajaxItems + pageItems).distinctBy { it.url }
     }
 
     override suspend fun load(url: String): LoadResponse? {

@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 class Dizimag : MainAPI() {
-    override var mainUrl = "https://ddizimag.icu"
+    override var mainUrl = "https://ddizimag2.icu"
     override var name = "Dizimag"
     override val hasMainPage = true
     override var lang = "tr"

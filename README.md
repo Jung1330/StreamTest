@@ -36,11 +36,32 @@ Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi s
 * **KoreanTürk (`koreanturk.tv`):**
   * Kore dizileri, Kore filmleri ve BL dizileri arşivi (sayfalama destekli).
   * HintPlayer, VidMoly, OK.ru, Sibnet, VK çoklu oynatıcı ve indirme desteği.
-* **Dizilla (`dizilla.la`) & Diziyou (`diziyou.one`):**
+* **Dizilla (`dizilla.la`) & Diziyou (`diziyou.love`):**
   * Yabancı dizi arşivleri, sezon/bölüm listeleme, 1080p HLS yayın ve indirme uyumluluğu.
   * Dizilla'da **Pichive** oynatıcısı için **NP_GATE (SHA-256 proof-of-work)** çözümü eklendi.
 * **HDKore (`hdkore1.com`) & DramaDizilerim (`dramadizilerim1.com`):**
   * Asya & Kore dizileri, şifreli oynatıcı çözümü ve indirme uyumluluğu.
+* **Dizimag (`ddizimag2.icu`):**
+  * Yabancı dizi, film, anime ve platform (Netflix, Disney+, Amazon Prime, Apple TV+) katalogları.
+  * **Pilavyer** HLS oynatıcı ve Türkçe altyazı desteği.
+* **Filmmodu (`filmmodu.cc`):**
+  * Yeni, trend ve popüler filmler, yabancı diziler ve tür arşivleri.
+  * **Bepeak (CryptoJS AES)** şifreli HLS oynatıcı ve altyazı çözümü.
+* **WebDramaTurkey (`webdramaturkey2.com`):**
+  * Kore, Çin, Japon ve Tayland dizileri, Asya filmleri ve animeler.
+  * FirePlayer ve çoklu alternatif oynatıcı desteği.
+* **AsyaAnimeleri (`asyaanimeleri.top`):**
+  * Güncel anime, donghua ve anime filmleri arşivi; FirePlayer (`asyaanimeleri.pw`) ve çoklu alternatif oynatıcı desteği.
+* **MiniDiziİzle (`minidiziizle.com`):**
+  * Türkçe Dublaj ve Altyazılı dikey/kısa mini diziler, doğrudan **1080p HLS (`master.m3u8`)** oynatıcı ve arama API desteği.
+* **Shortizle (`shortizle.com`):**
+  * Türkçe Dublaj & Altyazılı kısa/mini diziler, K-Drama ve filmler; doğrudan **1080p HLS** kaynak çözümü.
+* **DramaDünyam (`dramadunyam.com`):**
+  * Türkçe Dublaj & Altyazılı popüler kısa dramalar (NetShort, DramaWave, ReelShort vb.) doğrudan MP4 / HLS oynatma desteği.
+* **DiziCaN (`dizican.cc`) & AsyaDizi (`asyadizi.com`):**
+  * Türkçe altyazılı Kore, Çin, Japon, Tayland ve BL dizileri ile Asya filmleri arşivi (VidMoly, OK.ru, HintPlayer destekli).
+* **MyAsianTV (`ww7.myasiantv.rest` — EN):**
+  * **İngilizce Altyazılı (English Sub)** Kore, Çin, Japon ve Tayland dizileri ile Asya filmleri (VidMoly, Streamtape, MixDrop destekli).
 
 ---
 
