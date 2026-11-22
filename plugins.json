@@ -45,6 +45,31 @@
         "name": "Asyaanimeleri"
     },
     {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=asyadizi.com&sz=%size%",
+        "fileHash": "sha256-4e98e1b1c56bc4c501a4dbe77710df3441649d848ca039ab990043a90ad3c6c7",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 15207,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "AsianDrama",
+            "TvSeries",
+            "Movie",
+            "Anime"
+        ],
+        "version": 1,
+        "internalName": "Asyadizi",
+        "description": "StreamTest - AsyaDizi T\u00fcrk\u00e7e Altyaz\u0131l\u0131 Kore, \u00c7in, Japon, Tayland Dizileri, BL Dizileri ve Anime Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Asyadizi.cs3",
+        "name": "Asyadizi"
+    },
+    {
         "iconUrl": "https://www.google.com/s2/favicons?domain=www.dizibox.live&sz=%size%",
         "fileHash": "sha256-c1944f93699aa0616b92a8fd199bfccfd1900dca21715540103e79070adf69aa",
         "apiVersion": 1,
@@ -65,6 +90,30 @@
         "description": "StreamTest - DiziBOX Yabanc\u0131 Dizi Eklentisi (DBX Pro, Moly+, \u00c7oklu Oynat\u0131c\u0131, 1080p HLS & \u0130ndirme Destekli).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizibox.cs3",
         "name": "Dizibox"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=dizican.cc&sz=%size%",
+        "fileHash": "sha256-8c7c34ed17d52508ccbb17ddea173962a447837a4bedeb74aeb4ae8f3dcc34af",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 28634,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "AsianDrama",
+            "TvSeries",
+            "Movie"
+        ],
+        "version": 1,
+        "internalName": "Dizican",
+        "description": "StreamTest - DiziCaN Kore, \u00c7in, Japon, Tayland Dizileri ve Asya Filmleri Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizican.cs3",
+        "name": "Dizican"
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=dizilla.la&sz=%size%",
@@ -89,11 +138,11 @@
         "name": "Dizilla"
     },
     {
-        "iconUrl": "https://www.google.com/s2/favicons?domain=ddizimag.icu&sz=%size%",
-        "fileHash": "sha256-56976baa56daf80e463f4830f59425b74ad7ad0fb0a7dd51ad83cb2df1593653",
+        "iconUrl": "https://www.google.com/s2/favicons?domain=ddizimag2.icu&sz=%size%",
+        "fileHash": "sha256-cd489335e856a2449603705e037e95d0a2b00e365cc6e65f47a5d43006247c11",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 20406,
+        "fileSize": 20411,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -106,7 +155,7 @@
             "Movie",
             "Anime"
         ],
-        "version": 2,
+        "version": 3,
         "internalName": "Dizimag",
         "description": "StreamTest - Dizimag Yabanc\u0131 Dizi, Film ve Anime Eklentisi (Pilavyer HLS + Altyaz\u0131 destekli).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizimag.cs3",
@@ -136,11 +185,11 @@
         "name": "Diziwatch"
     },
     {
-        "iconUrl": "https://www.google.com/s2/favicons?domain=diziyou.one&sz=%size%",
-        "fileHash": "sha256-0926bfdaed3e719d71b1506d34c2911ab17b07dc7ce20dbba621596a8cb7e7db",
+        "iconUrl": "https://www.google.com/s2/favicons?domain=diziyou.love&sz=%size%",
+        "fileHash": "sha256-41daeb9c0d989843b1463ce51d5cb7f4d81c51fd15fc0034607fd460b273d409",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 17687,
+        "fileSize": 18952,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -151,7 +200,7 @@
         "tvTypes": [
             "TvSeries"
         ],
-        "version": 6,
+        "version": 7,
         "internalName": "Diziyou",
         "description": "StreamTest - Diziyou Yabanc\u0131 Dizi Eklentisi (do\u011frudan HLS oynatma).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Diziyou.cs3",
@@ -178,6 +227,29 @@
         "description": "StreamTest - Drama Dizilerim (dikey mini diziler) eklentisi: HLS oynatma deste\u011fi.",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dramadizilerim.cs3",
         "name": "Dramadizilerim"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=dramadunyam.com&sz=%size%",
+        "fileHash": "sha256-ce13603110cbe4b5c42f504c4fa0e27bb60f8809afcfdf50bffb46cd35dc49f5",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 15472,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "TvSeries",
+            "AsianDrama"
+        ],
+        "version": 1,
+        "internalName": "Dramadunyam",
+        "description": "StreamTest - DramaD\u00fcnyam T\u00fcrk\u00e7e Dublaj & Altyaz\u0131l\u0131 K\u0131sa/Mini Dizi Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dramadunyam.cs3",
+        "name": "Dramadunyam"
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=filmmakinesi.to&sz=%size%",
@@ -317,6 +389,77 @@
         "description": "StreamTest - KoreanT\u00fcrk Kore Dizileri & Filmleri Eklentisi (T\u00fcrk\u00e7e Altyaz\u0131l\u0131, \u00c7oklu Oynat\u0131c\u0131 & \u0130ndirme Destekli).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Koreanturk.cs3",
         "name": "Koreanturk"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=minidiziizle.com&sz=%size%",
+        "fileHash": "sha256-6445eebc1890968081f88bb4cd895c50cabfc21be6d3d379ab6dae7ee627e47f",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 17548,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "TvSeries",
+            "AsianDrama"
+        ],
+        "version": 1,
+        "internalName": "Minidiziizle",
+        "description": "StreamTest - Mini Dizi \u0130zle T\u00fcrk\u00e7e Dublaj & Altyaz\u0131l\u0131 K\u0131sa/Mini Dizi Eklentisi (1080p HLS).",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Minidiziizle.cs3",
+        "name": "Minidiziizle"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=myasiantv.rest&sz=%size%",
+        "fileHash": "sha256-28acb5e54cc02c79772cba7ff46846886415738ab5366307da3a08194a6b9f3e",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 20305,
+        "status": 1,
+        "language": "en",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "AsianDrama",
+            "TvSeries",
+            "Movie"
+        ],
+        "version": 1,
+        "internalName": "Myasiantv",
+        "description": "StreamTest - MyAsianTV English Subtitled Korean, Chinese, Japanese, Thai Dramas & Asian Movies.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Myasiantv.cs3",
+        "name": "Myasiantv"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=shortizle.com&sz=%size%",
+        "fileHash": "sha256-02e9beadbf9924c9987662cca0e0995aa026be51f2e854df89019e91e0251cbb",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 18666,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "TvSeries",
+            "AsianDrama",
+            "Movie"
+        ],
+        "version": 1,
+        "internalName": "Shortizle",
+        "description": "StreamTest - Shortizle T\u00fcrk\u00e7e Dublaj & Altyaz\u0131l\u0131 K\u0131sa/Mini Dizi, K-Drama ve Film Eklentisi (1080p HLS).",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Shortizle.cs3",
+        "name": "Shortizle"
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=tranimeizle.live&sz=%size%",
