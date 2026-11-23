@@ -116,6 +116,30 @@
         "name": "Dizican"
     },
     {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=dizigom.news&sz=%size%",
+        "fileHash": "sha256-1db72a4f2e9bd2373fed7527675e6a8f5899d88920346bb75015aed7c9be3b09",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 20359,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "TvSeries",
+            "Movie",
+            "Anime"
+        ],
+        "version": 1,
+        "internalName": "Dizigom",
+        "description": "StreamTest - DiziGom Full HD 1080p Yabanc\u0131 & Yerli Dizi, Film, Anime ve Platform Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizigom.cs3",
+        "name": "Dizigom"
+    },
+    {
         "iconUrl": "https://www.google.com/s2/favicons?domain=dizilla.la&sz=%size%",
         "fileHash": "sha256-b9bf76578e5efeb9877a9d5ea896b547e75afdf678f1d3f0a3e8451174bfe6a0",
         "apiVersion": 1,
@@ -160,6 +184,54 @@
         "description": "StreamTest - Dizimag Yabanc\u0131 Dizi, Film ve Anime Eklentisi (Pilavyer HLS + Altyaz\u0131 destekli).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizimag.cs3",
         "name": "Dizimag"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=ddizimom.icu&sz=%size%",
+        "fileHash": "sha256-e87c38a27bd565db7abf32b16ab9dd76bdc03a4450cbd7de30e74f8698c0b527",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 20362,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "TvSeries",
+            "Movie",
+            "Anime"
+        ],
+        "version": 1,
+        "internalName": "Dizimom",
+        "description": "StreamTest - DiziMom Yabanc\u0131 & Yerli Dizi, Film, Anime ve Platform Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizimom.cs3",
+        "name": "Dizimom"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=ddizipal.icu&sz=%size%",
+        "fileHash": "sha256-bf9d7565fc99bf8ddb0dab00f92f8493488ea8b904831ce3f78fa87155556018",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 20432,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "TvSeries",
+            "Movie",
+            "Anime"
+        ],
+        "version": 1,
+        "internalName": "Dizipal",
+        "description": "StreamTest - DiziPAL Yabanc\u0131/Yerli Dizi, Film, Anime ve Platform (Exxen, BluTV, Gain, Netflix, Disney+, TOD, Tabii) Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizipal.cs3",
+        "name": "Dizipal"
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=diziwatch.org&sz=%size%",
