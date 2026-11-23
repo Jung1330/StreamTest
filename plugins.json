@@ -370,6 +370,28 @@
         "name": "Filmmodu"
     },
     {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=fullhdfilmizlesene.now&sz=%size%",
+        "fileHash": "sha256-9d58b39c11443df4bf1066bc935a6ff05ab0dd27693b49760af4bce08cc8ab9e",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 16370,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "Movie"
+        ],
+        "version": 1,
+        "internalName": "Fullhdfilmizlesene",
+        "description": "StreamTest - FullHDFilmizlesene 4K & Full HD T\u00fcrk\u00e7e Dublaj ve Altyaz\u0131l\u0131 Film Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Fullhdfilmizlesene.cs3",
+        "name": "Fullhdfilmizlesene"
+    },
+    {
         "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmcehennemi.nl&sz=%size%",
         "fileHash": "sha256-7a64387b5e535cbb63adc51f19a5ecc006eb674dc42246dd01054511d7e878b7",
         "apiVersion": 1,
@@ -391,6 +413,29 @@
         "description": "StreamTest - HDFilmCehennemi Film & Dizi Eklentisi (site i\u00e7i arama, HLS, altyaz\u0131 ve \u00e7ift sesli rplayer indirme deste\u011fi).",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Hdfilmcehennemi.cs3",
         "name": "Hdfilmcehennemi"
+    },
+    {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmizle.live&sz=%size%",
+        "fileHash": "sha256-b29f0ea9868fa10d017679038b5eda12ef258541ef6b2b6f034dd4d265bbbf48",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/Jung1330/StreamTest",
+        "fileSize": 19933,
+        "status": 1,
+        "language": "tr",
+        "authors": [
+            "Jung1330",
+            "StreamTest",
+            "AI-Assistant"
+        ],
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "version": 1,
+        "internalName": "Hdfilmizle",
+        "description": "StreamTest - HDFilmizle 1080p T\u00fcrk\u00e7e Dublaj & Altyaz\u0131l\u0131 Film ve Yabanc\u0131 Dizi Eklentisi.",
+        "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Hdfilmizle.cs3",
+        "name": "Hdfilmizle"
     },
     {
         "iconUrl": "https://www.google.com/s2/favicons?domain=hdkore1.com&sz=%size%",
