@@ -1,83 +1,76 @@
-# ☁️ StreamTest - CloudStream Anime & Dizi Eklentileri
+# ☁️ StreamTest - CloudStream Dizi, Film, Anime & Drama Eklentileri
 
 > **Geliştirici:** Jung1330  
-> **Not:** Bu eklenti deposu ve modülleri **AI (Yapay Zeka)** desteği ile analiz edilmiş, tersine mühendislik ile API korumaları çözülerek güncellenmiş ve optimize edilmiştir.
+> **Toplam Eklenti:** 23 aktif eklenti (Türkçe & İngilizce)  
+> **Not:** Bu eklenti deposu ve modülleri **AI (Yapay Zeka)** desteği ile analiz edilmiş, güncel alan adları ve oynatıcı korumaları çözülerek optimize edilmiştir.
 
-Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi sağlayıcılarını içerir.
-
----
-
-## 🌟 İçerik ve Özellikler
-
-* **AnimeciX (`animecix.tv`):**
-  * Dinamik **X-E-H (AES-GCM)** yetkilendirme şifrelemesi eklendi.
-  * **TauVideo (`tau-video.xyz`)** 1080p, 720p, 480p doğrudan video ayıklayıcısı entegre edildi.
-  * CloudStream'in yerel **Tüm Sezonu İndir (Download Season)** özelliğiyle tam uyumlu.
-* **Diziwatch (`diziwatch.org`):**
-  * Hızlı ve temiz REST arama API'si entegrasyonu.
-  * Voe, Sibnet, Mail.ru, OK.ru, AnizmPlayer çoklu oynatıcı desteği ile 1080p Full HD yayın.
-  * Sayfalanan "Anime Arşivi" ve "Son Bölümler" kategorileri, sezon/bölüm listeleme.
-* **TRAnimeİzle (`tranimeizle.live`):**
-  * Site 2026-11'de Nuxt tabanlı yeni bir uygulamaya taşındı; eklenti artık sitenin JSON API'sini kullanıyor.
-  * "Son Eklenenler", "En Çok Beğenilenler" ve "Tamamlananlar" sıralamaları (limit/offset sayfalama).
-  * Katalog araması (`/api/search/catalog`), bölüm listesi ve **wid çerezli HLS** kaynak çözümü.
-* **HDFilmCehennemi (`hdfilmcehennemi.nl`):**
-  * Film ve yabancı dizi kategorileri, yerel JSON + DuckDuckGo destekli arama.
-  * Kendi oynatıcısındaki (`rplayer` / `CloseLoad`) şifreli yayın adresini çözer; çift sesli (TR Dublaj / Orijinal) birleşik (muxed) HLS akışları ile **izleme ve indirme** tam uyumlu.
-* **FilmMakinesi (`filmmakinesi.to`):**
-  * Sayfalanan film ve dizi listesi, site içi arama.
-  * Şifreli oynatıcı çözümü, çift sesli birleşik (muxed) HLS kaliteleri, altyazılar ve tam indirme desteği.
-* **DiziBOX (`dizibox.live`):**
-  * Yabancı dizi arşivi, IMDb sıralaması ve tür kategorileri (sayfalama destekli).
-  * **DBX Pro (King/Molystream AES)**, **Moly+ (VidMoly)** ve alternatif oynatıcı çözümü; 1080p HLS, Türkçe altyazı ve tam indirme desteği.
-* **JetFilmizle (`jetfilmizle.app`):**
-  * Türkçe Dublaj & Altyazılı filmler, yabancı ve yerli diziler (sayfalama destekli).
-  * **OPlay**, **Gold**, **Vip**, **JetGlobal** ve çoklu oynatıcılarla doğrudan MP4 / 1080p HLS akışı ve sorunsuz indirme desteği.
-* **KoreanTürk (`koreanturk.tv`):**
-  * Kore dizileri, Kore filmleri ve BL dizileri arşivi (sayfalama destekli).
-  * HintPlayer, VidMoly, OK.ru, Sibnet, VK çoklu oynatıcı ve indirme desteği.
-* **Dizilla (`dizilla.la`) & Diziyou (`diziyou.love`):**
-  * Yabancı dizi arşivleri, sezon/bölüm listeleme, 1080p HLS yayın ve indirme uyumluluğu.
-  * Dizilla'da **Pichive** oynatıcısı için **NP_GATE (SHA-256 proof-of-work)** çözümü eklendi.
-* **HDKore (`hdkore1.com`) & DramaDizilerim (`dramadizilerim1.com`):**
-  * Asya & Kore dizileri, şifreli oynatıcı çözümü ve indirme uyumluluğu.
-* **Dizimag (`ddizimag2.icu`):**
-  * Yabancı dizi, film, anime ve platform (Netflix, Disney+, Amazon Prime, Apple TV+) katalogları.
-  * **Pilavyer** HLS oynatıcı ve Türkçe altyazı desteği.
-* **Filmmodu (`filmmodu.cc`):**
-  * Yeni, trend ve popüler filmler, yabancı diziler ve tür arşivleri.
-  * **Bepeak (CryptoJS AES)** şifreli HLS oynatıcı ve altyazı çözümü.
-* **WebDramaTurkey (`webdramaturkey2.com`):**
-  * Kore, Çin, Japon ve Tayland dizileri, Asya filmleri ve animeler.
-  * FirePlayer ve çoklu alternatif oynatıcı desteği.
-* **AsyaAnimeleri (`asyaanimeleri.top`):**
-  * Güncel anime, donghua ve anime filmleri arşivi; FirePlayer (`asyaanimeleri.pw`) ve çoklu alternatif oynatıcı desteği.
-* **MiniDiziİzle (`minidiziizle.com`):**
-  * Türkçe Dublaj ve Altyazılı dikey/kısa mini diziler, doğrudan **1080p HLS (`master.m3u8`)** oynatıcı ve arama API desteği.
-* **Shortizle (`shortizle.com`):**
-  * Türkçe Dublaj & Altyazılı kısa/mini diziler, K-Drama ve filmler; doğrudan **1080p HLS** kaynak çözümü.
-* **DramaDünyam (`dramadunyam.com`):**
-  * Türkçe Dublaj & Altyazılı popüler kısa dramalar (NetShort, DramaWave, ReelShort vb.) doğrudan MP4 / HLS oynatma desteği.
-* **DiziCaN (`dizican.cc`) & AsyaDizi (`asyadizi.com`):**
-  * Türkçe altyazılı Kore, Çin, Japon, Tayland ve BL dizileri ile Asya filmleri arşivi (VidMoly, OK.ru, HintPlayer destekli).
-* **MyAsianTV (`ww7.myasiantv.rest` — EN):**
-  * **İngilizce Altyazılı (English Sub)** Kore, Çin, Japon ve Tayland dizileri ile Asya filmleri (VidMoly, Streamtape, MixDrop destekli).
-* **DiziPAL (`ddizipal.icu`):**
-  * Yerli ve yabancı diziler, filmler, animeler ve platform katalogları (**Exxen, BluTV, GAIN, TOD, Tabii, Netflix, Disney+, Amazon Prime, HBO Max**).
-  * **Pilavyer** HLS oynatıcı ve Türkçe altyazı desteği.
+Bu depo, **CloudStream 3** uygulaması için güncel **Türkçe** (ve seçkin **İngilizce**) film, yabancı/yerli dizi, anime, Asya/Kore dizisi ve kısa/mini drama sağlayıcılarını tek çatı altında sunar.
 
 ---
 
-## 💾 Kurulum (CloudStream)
+## 💾 Kurulum (CloudStream 3)
 
 1. **[CloudStream APK](https://github.com/recloudstream/cloudstream/releases)** son sürümünü cihazınıza kurun.
-2. Uygulama içinde:
-   * **Ayarlar (Settings) > Uzantılar (Extensions) > Depo Ekle (Add Repository)** yolunu izleyin.
-   * Depo URL kısmına şu bağlantıyı yapıştırın:
+2. Uygulama içinde şu adımları izleyin:
+   * **Ayarlar (Settings) > Uzantılar (Extensions) > Depo Ekle (Add Repository)**
+   * Depo URL kısmına aşağıdaki bağlantıyı yapıştırın:
    ```text
    https://raw.githubusercontent.com/Jung1330/StreamTest/main/repo.json
    ```
-3. Eklentiler listesinden dilediğiniz eklentiyi kurup izleme ve indirme özelliklerini kullanabilirsiniz.
+3. Eklentiler listesinden dilediğiniz eklentileri kurup izleme ve indirme özelliklerini kullanabilirsiniz.
+
+---
+
+## 📦 Eklenti Kataloğu (23 Eklenti)
+
+### 🎬 Film & Yabancı / Yerli Dizi Eklentileri (9)
+
+| Eklenti | Güncel Adres | Dil | İçerik | Özellikler & Oynatıcılar |
+| :--- | :--- | :---: | :--- | :--- |
+| **DiziPAL** | `ddizipal.icu` | 🇹🇷 TR | Dizi, Film, Anime | Exxen, BluTV, GAIN, TOD, Tabii, Netflix, Disney+, Amazon Prime, HBO Max; Pilavyer HLS & altyazı |
+| **Dizimag** | `ddizimag2.icu` | 🇹🇷 TR | Dizi, Film, Anime | Netflix, Disney+, Amazon Prime, Apple TV+ katalogları; Pilavyer HLS & Türkçe altyazı |
+| **HDFilmCehennemi** | `hdfilmcehennemi.nl` | 🇹🇷 TR | Film, Dizi | Yerel JSON + DuckDuckGo arama; `rplayer` / `CloseLoad` çift sesli (TR Dublaj / Orijinal) muxed HLS |
+| **FilmMakinesi** | `filmmakinesi.to` | 🇹🇷 TR | Film, Dizi | Sayfalanan film/dizi arşivi, şifreli oynatıcı çözümü, çift sesli muxed HLS & altyazı |
+| **Filmmodu** | `filmmodu.cc` | 🇹🇷 TR | Film, Dizi | Yeni, trend ve popüler filmler, yabancı diziler; Bepeak (CryptoJS AES) 1080p HLS |
+| **JetFilmizle** | `jetfilmizle.app` | 🇹🇷 TR | Film, Dizi | TR Dublaj / Altyazılı filmler, yerli & yabancı diziler; VideoPark (OPlay, Vip, Gold), PlayerX HLS/MP4 |
+| **DiziBOX** | `dizibox.live` | 🇹🇷 TR | Yabancı Dizi | Yıl ve tür kategorileri; DBX Pro (King/Molystream AES), Moly+ (VidMoly), OK.ru 1080p HLS |
+| **Dizilla** | `dizilla.la` | 🇹🇷 TR | Yabancı Dizi | Yabancı dizi arşivi, sezon/bölüm listeleme; Pichive 1080p HLS & altyazı |
+| **Diziyou** | `diziyou.love` | 🇹🇷 TR | Yabancı Dizi | Dizi arşivi ve canlı AJAX arama; TR Altyazılı / TR Dublaj / EN Altyazılı doğrudan HLS |
+
+---
+
+### 🎌 Anime & Donghua Eklentileri (4)
+
+| Eklenti | Güncel Adres | Dil | İçerik | Özellikler & Oynatıcılar |
+| :--- | :--- | :---: | :--- | :--- |
+| **AnimeciX** | `animecix.tv` | 🇹🇷 TR | Anime, Film | Dinamik X-E-H (AES-GCM) yetkilendirme, **TauVideo** (`tau-video.xyz`) 1080p/720p/480p, sezon indirme |
+| **TRAnimeİzle** | `tranimeizle.live` | 🇹🇷 TR | Anime | Yeni Nuxt JSON API (sıralamalar, katalog araması `/api/search/catalog`), `wid` çerezli HLS |
+| **Diziwatch** | `diziwatch.org` | 🇹🇷 TR | Anime, Dizi | Hızlı REST arama API'si; AnizmPlayer (FirePlayer), Voe, Sibnet, Mail.ru, OK.ru 1080p |
+| **AsyaAnimeleri** | `asyaanimeleri.top` | 🇹🇷 TR | Anime, Donghua, Film | Güncel anime ve donghua arşivi; FirePlayer (`asyaanimeleri.pw`) ve çoklu alternatif oynatıcılar |
+
+---
+
+### 🇰🇷 Kore & Asya Dizi / Film Eklentileri (5)
+
+| Eklenti | Güncel Adres | Dil | İçerik | Özellikler & Oynatıcılar |
+| :--- | :--- | :---: | :--- | :--- |
+| **KoreanTürk** | `koreanturk.tv` | 🇹🇷 TR | K-Drama, Film, BL | Kore dizileri, filmleri ve BL arşivi; HintPlayer, VidMoly, OK.ru, Sibnet, VK |
+| **WebDramaTurkey** | `webdramaturkey2.com` | 🇹🇷 TR | Asya Dizisi, Film, Anime | Kore, Çin, Japon ve Tayland dizileri; FirePlayer (`dtpasn.asia`) ve çoklu oynatıcılar |
+| **DiziCaN** | `dizican.cc` | 🇹🇷 TR | Asya Dizisi, Film, BL | Ülke ve yıl filtreli Kore, Çin, Japon, Tayland dizileri; VidMoly, OK.ru, HintPlayer |
+| **AsyaDizi** | `asyadizi.com` | 🇹🇷 TR | Asya Dizisi, Film, Anime | Çin, Kore, BL dizileri ve animeler; `vdo-src` Odnoklassniki/OK.ru ve VidMoly oynatıcı |
+| **MyAsianTV (EN)** | `ww7.myasiantv.rest` | 🇬🇧 EN | Asian Drama, Movie | **İngilizce Altyazılı (Eng Sub)** K-Drama, C-Drama, J-Drama & filmler; VidMoly, Streamtape, MixDrop |
+
+---
+
+### 📱 Kısa / Dikey Mini Drama Eklentileri (5)
+
+| Eklenti | Güncel Adres | Dil | İçerik | Özellikler & Oynatıcılar |
+| :--- | :--- | :---: | :--- | :--- |
+| **MiniDiziİzle** | `minidiziizle.com` | 🇹🇷 TR | Mini / Kısa Dizi | Çin & Batı yapımı kısa diziler, REST arama; **TR Dublaj & TR Altyazılı 1080p HLS** |
+| **Shortizle** | `shortizle.com` | 🇹🇷 TR | Mini Dizi, K-Drama, Film | Yeni çıkanlar, trendler, popülerler ve anlık arama; **1080p HLS** kaynak çözümü |
+| **DramaDünyam** | `dramadunyam.com` | 🇹🇷 TR | Mini / Kısa Drama | NetShort, DramaWave, ReelShort vb. TR dublaj & altyazılı kısa diziler; doğrudan MP4 / HLS |
+| **DramaDizilerim** | `dramadizilerim1.com` | 🇹🇷 TR | Mini / Kısa Drama | Kore & Çin kısa dramaları, katalog API araması; doğrudan MP4 / HLS & altyazı |
+| **HDKore** | `hdkore1.com` | 🇹🇷 TR | Kore & Kısa Drama | Türkçe dublaj & altyazılı diziler ve filmler, AJAX önizleme araması; doğrudan 1080p MP4 / HLS |
 
 ---
 
@@ -85,4 +78,10 @@ Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi s
 
 * **Mimar:** Jung1330 & AI-Assistant
 * **Dil:** Kotlin (Android / CloudStream 3 API)
-* **Derleme:** GitHub Actions (`./gradlew make makePluginsJson`)
+* **Derleme & Yayın:** GitHub Actions (`./gradlew make makePluginsJson` → `builds` dalı)
+
+---
+
+## ⚠️ Yasal Uyarı
+
+Bu depo yalnızca kamuya açık web sitelerinden içerik bağlantılarını CloudStream 3 formatında ayrıştıran bağımsız eklenti kodlarını barındırır. Depo hiçbir video, ses veya medya dosyasını barındırmaz; tüm içerik hakları ilgili kaynaklara aittir.
