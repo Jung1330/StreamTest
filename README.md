@@ -62,6 +62,9 @@ Bu depo, **CloudStream 3** uygulaması için en güncel Türkçe anime ve dizi s
   * Türkçe altyazılı Kore, Çin, Japon, Tayland ve BL dizileri ile Asya filmleri arşivi (VidMoly, OK.ru, HintPlayer destekli).
 * **MyAsianTV (`ww7.myasiantv.rest` — EN):**
   * **İngilizce Altyazılı (English Sub)** Kore, Çin, Japon ve Tayland dizileri ile Asya filmleri (VidMoly, Streamtape, MixDrop destekli).
+* **DiziPAL (`ddizipal.icu`):**
+  * Yerli ve yabancı diziler, filmler, animeler ve platform katalogları (**Exxen, BluTV, GAIN, TOD, Tabii, Netflix, Disney+, Amazon Prime, HBO Max**).
+  * **Pilavyer** HLS oynatıcı ve Türkçe altyazı desteği.
 
 ---
 
