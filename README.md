@@ -1,7 +1,7 @@
 # ☁️ StreamTest - CloudStream Dizi, Film, Anime & Drama Eklentileri
 
 > **Geliştirici:** Jung1330  
-> **Toplam Eklenti:** 25 aktif eklenti (Türkçe & İngilizce)  
+> **Toplam Eklenti:** 27 aktif eklenti (Türkçe & İngilizce)  
 > **Not:** Bu eklenti deposu ve modülleri **AI (Yapay Zeka)** desteği ile analiz edilmiş, güncel alan adları ve oynatıcı korumaları çözülerek optimize edilmiştir.
 
 Bu depo, **CloudStream 3** uygulaması için güncel **Türkçe** (ve seçkin **İngilizce**) film, yabancı/yerli dizi, anime, Asya/Kore dizisi ve kısa/mini drama sağlayıcılarını tek çatı altında sunar.
@@ -21,12 +21,14 @@ Bu depo, **CloudStream 3** uygulaması için güncel **Türkçe** (ve seçkin **
 
 ---
 
-## 📦 Eklenti Kataloğu (25 Eklenti)
+## 📦 Eklenti Kataloğu (27 Eklenti)
 
-### 🎬 Film & Yabancı / Yerli Dizi Eklentileri (11)
+### 🎬 Film & Yabancı / Yerli Dizi Eklentileri (13)
 
 | Eklenti | Güncel Adres | Dil | İçerik | Özellikler & Oynatıcılar |
 | :--- | :--- | :---: | :--- | :--- |
+| **FullHDFilmizlesene** | `www.fullhdfilmizlesene.now` | 🇹🇷 TR | Film | 4K / 1080p Türkçe Dublaj & Altyazılı filmler; `scx` (ROT13+Base64) & RapidVid çift sesli HLS + VTT altyazı |
+| **HDFilmizle** | `www.hdfilmizle.live` | 🇹🇷 TR | Film, Yabancı Dizi | 1080p Türkçe Dublaj & Altyazılı film/dizi arşivi, anlık JSON arama; Vidrame & VidMoxy HLS + VTT altyazı |
 | **DiziPAL** | `ddizipal.icu` | 🇹🇷 TR | Dizi, Film, Anime | Exxen, BluTV, GAIN, TOD, Tabii, Netflix, Disney+, Amazon Prime, HBO Max; Pilavyer HLS & altyazı |
 | **DiziGom** | `www.dizigom.news` | 🇹🇷 TR | Dizi, Film, Anime | Netflix, Disney+, Amazon Prime, HBO Max, Exxen, BluTV, GAIN; Pilavyer HLS & altyazı |
 | **DiziMom** | `ddizimom.icu` | 🇹🇷 TR | Dizi, Film, Anime | Yerli & yabancı dizi, film, anime ve platform katalogları; Pilavyer HLS & Türkçe altyazı |
