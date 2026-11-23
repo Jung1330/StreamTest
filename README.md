@@ -1,7 +1,7 @@
 # ☁️ StreamTest - CloudStream Dizi, Film, Anime & Drama Eklentileri
 
 > **Geliştirici:** Jung1330  
-> **Toplam Eklenti:** 23 aktif eklenti (Türkçe & İngilizce)  
+> **Toplam Eklenti:** 25 aktif eklenti (Türkçe & İngilizce)  
 > **Not:** Bu eklenti deposu ve modülleri **AI (Yapay Zeka)** desteği ile analiz edilmiş, güncel alan adları ve oynatıcı korumaları çözülerek optimize edilmiştir.
 
 Bu depo, **CloudStream 3** uygulaması için güncel **Türkçe** (ve seçkin **İngilizce**) film, yabancı/yerli dizi, anime, Asya/Kore dizisi ve kısa/mini drama sağlayıcılarını tek çatı altında sunar.
@@ -21,13 +21,15 @@ Bu depo, **CloudStream 3** uygulaması için güncel **Türkçe** (ve seçkin **
 
 ---
 
-## 📦 Eklenti Kataloğu (23 Eklenti)
+## 📦 Eklenti Kataloğu (25 Eklenti)
 
-### 🎬 Film & Yabancı / Yerli Dizi Eklentileri (9)
+### 🎬 Film & Yabancı / Yerli Dizi Eklentileri (11)
 
 | Eklenti | Güncel Adres | Dil | İçerik | Özellikler & Oynatıcılar |
 | :--- | :--- | :---: | :--- | :--- |
 | **DiziPAL** | `ddizipal.icu` | 🇹🇷 TR | Dizi, Film, Anime | Exxen, BluTV, GAIN, TOD, Tabii, Netflix, Disney+, Amazon Prime, HBO Max; Pilavyer HLS & altyazı |
+| **DiziGom** | `www.dizigom.news` | 🇹🇷 TR | Dizi, Film, Anime | Netflix, Disney+, Amazon Prime, HBO Max, Exxen, BluTV, GAIN; Pilavyer HLS & altyazı |
+| **DiziMom** | `ddizimom.icu` | 🇹🇷 TR | Dizi, Film, Anime | Yerli & yabancı dizi, film, anime ve platform katalogları; Pilavyer HLS & Türkçe altyazı |
 | **Dizimag** | `ddizimag2.icu` | 🇹🇷 TR | Dizi, Film, Anime | Netflix, Disney+, Amazon Prime, Apple TV+ katalogları; Pilavyer HLS & Türkçe altyazı |
 | **HDFilmCehennemi** | `hdfilmcehennemi.nl` | 🇹🇷 TR | Film, Dizi | Yerel JSON + DuckDuckGo arama; `rplayer` / `CloseLoad` çift sesli (TR Dublaj / Orijinal) muxed HLS |
 | **FilmMakinesi** | `filmmakinesi.to` | 🇹🇷 TR | Film, Dizi | Sayfalanan film/dizi arşivi, şifreli oynatıcı çözümü, çift sesli muxed HLS & altyazı |
