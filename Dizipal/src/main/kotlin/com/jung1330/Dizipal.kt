@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
 class Dizipal : MainAPI() {
-    override var mainUrl = "https://ddizipal.icu"
+    override var mainUrl = "https://ddizipal.live"
     override var name = "DiziPAL"
     override val hasMainPage = true
     override var lang = "tr"

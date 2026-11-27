@@ -29,7 +29,7 @@ Bu depo, **CloudStream 3** uygulaması için güncel **Türkçe** (ve seçkin **
 | :--- | :--- | :---: | :--- | :--- |
 | **FullHDFilmizlesene** | `www.fullhdfilmizlesene.now` | 🇹🇷 TR | Film | 4K / 1080p Türkçe Dublaj & Altyazılı filmler; `scx` (ROT13+Base64) & RapidVid çift sesli HLS + VTT altyazı |
 | **HDFilmizle** | `www.hdfilmizle.live` | 🇹🇷 TR | Film, Yabancı Dizi | 1080p Türkçe Dublaj & Altyazılı film/dizi arşivi, anlık JSON arama; Vidrame & VidMoxy HLS + VTT altyazı |
-| **DiziPAL** | `ddizipal.icu` | 🇹🇷 TR | Dizi, Film, Anime | Exxen, BluTV, GAIN, TOD, Tabii, Netflix, Disney+, Amazon Prime, HBO Max; Pilavyer HLS & altyazı |
+| **DiziPAL** | `ddizipal.live` | 🇹🇷 TR | Dizi, Film, Anime | Exxen, BluTV, GAIN, TOD, Tabii, Netflix, Disney+, Amazon Prime, HBO Max; Pilavyer HLS & altyazı |
 | **DiziGom** | `www.dizigom.news` | 🇹🇷 TR | Dizi, Film, Anime | Netflix, Disney+, Amazon Prime, HBO Max, Exxen, BluTV, GAIN; Pilavyer HLS & altyazı |
 | **DiziMom** | `ddizimom.icu` | 🇹🇷 TR | Dizi, Film, Anime | Yerli & yabancı dizi, film, anime ve platform katalogları; Pilavyer HLS & Türkçe altyazı |
 | **Dizimag** | `ddizimag2.icu` | 🇹🇷 TR | Dizi, Film, Anime | Netflix, Disney+, Amazon Prime, Apple TV+ katalogları; Pilavyer HLS & Türkçe altyazı |
