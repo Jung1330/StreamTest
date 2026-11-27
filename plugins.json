@@ -210,11 +210,11 @@
         "name": "Dizimom"
     },
     {
-        "iconUrl": "https://www.google.com/s2/favicons?domain=ddizipal.icu&sz=%size%",
-        "fileHash": "sha256-bf9d7565fc99bf8ddb0dab00f92f8493488ea8b904831ce3f78fa87155556018",
+        "iconUrl": "https://www.google.com/s2/favicons?domain=ddizipal.live&sz=%size%",
+        "fileHash": "sha256-c78839c7e6e927de3ac628a247f72521269698bacaa75120a7949a0a4065d5b6",
         "apiVersion": 1,
         "repositoryUrl": "https://github.com/Jung1330/StreamTest",
-        "fileSize": 20432,
+        "fileSize": 20435,
         "status": 1,
         "language": "tr",
         "authors": [
@@ -227,7 +227,7 @@
             "Movie",
             "Anime"
         ],
-        "version": 1,
+        "version": 2,
         "internalName": "Dizipal",
         "description": "StreamTest - DiziPAL Yabanc\u0131/Yerli Dizi, Film, Anime ve Platform (Exxen, BluTV, Gain, Netflix, Disney+, TOD, Tabii) Eklentisi.",
         "url": "https://raw.githubusercontent.com/Jung1330/StreamTest/builds/Dizipal.cs3",
