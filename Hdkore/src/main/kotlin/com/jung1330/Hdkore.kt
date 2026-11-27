@@ -13,6 +13,7 @@ import java.net.URLEncoder
 
 class Hdkore : MainAPI() {
     override var mainUrl              = "https://hdkore1.com"
+    private val initialMainUrl = mainUrl
     override var name                 = "HDKore"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -61,6 +62,8 @@ class Hdkore : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Hdkore")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         if (request.data.contains("/api/v3/")) {
             val apiUrl = "${request.data}&page=$page"
             val jsonText = runCatching {
@@ -81,6 +84,7 @@ class Hdkore : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Hdkore")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
 
         // Sitenin kendi anlık JSON arama servisi
@@ -130,7 +134,8 @@ class Hdkore : MainAPI() {
         }
 
         // Yedek DuckDuckGo araması
-        val q = URLEncoder.encode("site:hdkore1.com $query", "UTF-8")
+        val host = runCatching { java.net.URI(mainUrl).host?.removePrefix("www.") }.getOrNull() ?: "hdkore1.com"
+        val q = URLEncoder.encode("site:$host $query", "UTF-8")
         val doc = runCatching { app.get("https://html.duckduckgo.com/html/?q=$q").document }.getOrNull()
             ?: return emptyList()
 
@@ -160,6 +165,8 @@ class Hdkore : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Hdkore")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val title = doc.selectFirst("meta[property='og:title']")?.attr("content")?.substringBefore(" | ")?.trim()
@@ -240,6 +247,8 @@ class Hdkore : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Hdkore")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val pageUrl = data.substringBefore("?")
         val doc = try {
             app.get(pageUrl).document

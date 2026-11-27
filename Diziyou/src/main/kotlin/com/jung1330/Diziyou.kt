@@ -11,6 +11,7 @@ import java.net.URLEncoder
 
 class Diziyou : MainAPI() {
     override var mainUrl              = "https://www.diziyou.love"
+    private val initialMainUrl = mainUrl
     override var name                 = "Diziyou"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -100,12 +101,15 @@ class Diziyou : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Diziyou")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val url = if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/"
         val doc = app.get(url).document
         return newHomePageResponse(request.name, parseSeriesItems(doc))
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Diziyou")
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
 
@@ -131,6 +135,8 @@ class Diziyou : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Diziyou")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val rawTitle = doc.selectFirst("meta[property='og:title']")?.attr("content")
@@ -167,6 +173,8 @@ class Diziyou : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        DomainConfig.sync(this, "Diziyou")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val page = try {
             app.get(data).document
         } catch (t: Throwable) {

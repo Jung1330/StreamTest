@@ -12,6 +12,7 @@ import java.net.URLEncoder
 
 class Dramadizilerim : MainAPI() {
     override var mainUrl              = "https://dramadizilerim1.com"
+    private val initialMainUrl = mainUrl
     override var name                 = "Drama Dizilerim"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -65,11 +66,14 @@ class Dramadizilerim : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Dramadizilerim")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val doc = app.get("${request.data}$page").document
         return newHomePageResponse(request.name, parseCatalogCards(doc))
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Dramadizilerim")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
 
         val htmlResults = runCatching {
@@ -106,6 +110,8 @@ class Dramadizilerim : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Dramadizilerim")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val html = app.get(url).text
         val doc = Jsoup.parse(html)
 
@@ -170,6 +176,8 @@ class Dramadizilerim : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Dramadizilerim")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val watchHtml = try {
             app.get(data).text
         } catch (t: Throwable) {

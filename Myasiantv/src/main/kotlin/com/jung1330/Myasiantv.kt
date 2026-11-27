@@ -11,6 +11,7 @@ import java.net.URLEncoder
 
 class Myasiantv : MainAPI() {
     override var mainUrl              = "https://ww7.myasiantv.rest"
+    private val initialMainUrl = mainUrl
     override var name                 = "MyAsianTV (EN)"
     override val hasMainPage          = true
     override var lang                 = "en"
@@ -94,6 +95,8 @@ class Myasiantv : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Myasiantv")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val url = if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/"
         val doc = app.get(url).document
         val items = parseItems(doc)
@@ -101,6 +104,7 @@ class Myasiantv : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Myasiantv")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = try {
             app.get("$mainUrl/?s=$encoded").document
@@ -112,6 +116,8 @@ class Myasiantv : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Myasiantv")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         var doc = app.get(url).document
         var targetUrl = url
 
@@ -240,6 +246,8 @@ class Myasiantv : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Myasiantv")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val doc = try {
             app.get(data).document
         } catch (t: Throwable) {

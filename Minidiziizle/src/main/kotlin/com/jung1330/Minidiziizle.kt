@@ -11,6 +11,7 @@ import java.net.URLEncoder
 
 class Minidiziizle : MainAPI() {
     override var mainUrl              = "https://minidiziizle.com"
+    private val initialMainUrl = mainUrl
     override var name                 = "MiniDiziİzle"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -63,6 +64,8 @@ class Minidiziizle : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Minidiziizle")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val url = if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/"
         val doc = app.get(url).document
         val items = parseCards(doc)
@@ -72,6 +75,7 @@ class Minidiziizle : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Minidiziizle")
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
         val encoded = URLEncoder.encode(trimmed, "UTF-8")
@@ -108,6 +112,8 @@ class Minidiziizle : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Minidiziizle")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val rawTitle = doc.selectFirst("h1")?.text()?.trim()
@@ -164,6 +170,8 @@ class Minidiziizle : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Minidiziizle")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val doc = try {
             app.get(data).document
         } catch (t: Throwable) {

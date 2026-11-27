@@ -22,6 +22,7 @@ import org.jsoup.Jsoup
 
 class TRAnimeIzle : MainAPI() {
     override var mainUrl              = "https://www.tranimeizle.live"
+    private val initialMainUrl = mainUrl
     override var name                 = "TRAnimeİzle"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -60,6 +61,8 @@ class TRAnimeIzle : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "TRAnimeIzle")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val offset = ((page - 1).coerceAtLeast(0)) * pageSize
         val response = try {
             app.get("${request.data}?limit=$pageSize&offset=$offset").parsedSafe<RankingsResponse>()
@@ -73,6 +76,7 @@ class TRAnimeIzle : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "TRAnimeIzle")
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
 
@@ -104,6 +108,8 @@ class TRAnimeIzle : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "TRAnimeIzle")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val slug = slugOf(url) ?: return null
 
         val detail = (try {
@@ -206,6 +212,8 @@ class TRAnimeIzle : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        DomainConfig.sync(this, "TRAnimeIzle")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val slug = slugOf(data) ?: return false
 
         val episode = (try {

@@ -82,6 +82,7 @@ Bu depo, **CloudStream 3** uygulaması için güncel **Türkçe** (ve seçkin **
 
 * **Mimar:** Jung1330 & AI-Assistant
 * **Dil:** Kotlin (Android / CloudStream 3 API)
+* **Merkezi Domain Yönetimi (`domains.json`):** Tüm 27 eklenti açılışta kök dizindeki [`domains.json`](domains.json) dosyasından güncel adreslerini otomatik çeker (15 dk önbellekli, hata durumunda dahili yedek adres devrede). Sadece domain değiştiğinde `.cs3` derlemeden `domains.json` dosyasını düzenlemek yeterlidir.
 * **Derleme & Yayın:** GitHub Actions (`./gradlew make makePluginsJson` → `builds` dalı)
 
 ---

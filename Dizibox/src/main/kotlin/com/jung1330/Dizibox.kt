@@ -17,6 +17,7 @@ import javax.crypto.spec.SecretKeySpec
 
 class Dizibox : MainAPI() {
     override var mainUrl              = "https://www.dizibox.live"
+    private val initialMainUrl = mainUrl
     override var name                 = "DiziBOX"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -166,6 +167,8 @@ class Dizibox : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Dizibox")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         if (page > 1 && request.data.trimEnd('/') == mainUrl.trimEnd('/')) {
             return newHomePageResponse(request.name, emptyList())
         }
@@ -175,6 +178,7 @@ class Dizibox : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Dizibox")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = try {
             app.get("$mainUrl/?s=$encoded", cookies = dbxCookies()).document
@@ -211,6 +215,8 @@ class Dizibox : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Dizibox")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val cookies = dbxCookies()
         val doc = app.get(url, cookies = cookies).document
 
@@ -517,6 +523,8 @@ class Dizibox : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Dizibox")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val cookies = dbxCookies()
         val mainDoc = try {
             app.get(data, cookies = cookies).document

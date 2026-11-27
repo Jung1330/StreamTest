@@ -11,6 +11,7 @@ import java.net.URLEncoder
 
 class Hdfilmizle : MainAPI() {
     override var mainUrl              = "https://www.hdfilmizle.live"
+    private val initialMainUrl = mainUrl
     override var name                 = "HDFilmizle"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -57,6 +58,8 @@ class Hdfilmizle : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Hdfilmizle")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val base = request.data.trimEnd('/')
         val url = if (page <= 1) "$base/" else "$base/page/$page/"
         val doc = app.get(url, referer = "$mainUrl/").document
@@ -69,6 +72,7 @@ class Hdfilmizle : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Hdfilmizle")
         val trimmed = query.trim()
         if (trimmed.isBlank()) return emptyList()
 
@@ -130,6 +134,8 @@ class Hdfilmizle : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Hdfilmizle")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url, referer = "$mainUrl/").document
         val h1 = doc.selectFirst("h1") ?: return null
         val yearFromH1 = h1.selectFirst("small")?.text()?.let { Regex("(19|20)\\d{2}").find(it)?.value?.toIntOrNull() }
@@ -265,6 +271,8 @@ class Hdfilmizle : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Hdfilmizle")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val html = app.get(data, referer = "$mainUrl/").text
         val partsJson = Regex("""let\s+parts\s*=\s*(\[.*?\]);""", RegexOption.DOT_MATCHES_ALL)
             .find(html)?.groupValues?.get(1)

@@ -11,6 +11,7 @@ import java.net.URLEncoder
 
 class Filmmakinesi : MainAPI() {
     override var mainUrl              = "https://www.filmmakinesi.to"
+    private val initialMainUrl = mainUrl
     override var name                 = "FilmMakinesi"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -49,6 +50,8 @@ class Filmmakinesi : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Filmmakinesi")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val url = if (page <= 1) request.data else "${request.data}sayfa/$page/"
         val doc = app.get(url).document
 
@@ -73,6 +76,7 @@ class Filmmakinesi : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Filmmakinesi")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = try {
             app.get("$mainUrl/arama/?s=$encoded").document
@@ -99,6 +103,8 @@ class Filmmakinesi : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Filmmakinesi")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val rawTitle = doc.selectFirst("meta[property='og:title']")?.attr("content")
@@ -470,6 +476,8 @@ class Filmmakinesi : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        DomainConfig.sync(this, "Filmmakinesi")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val isContentPage = data.startsWith(mainUrl) || data.contains("/film/") || data.contains("/dizi/") ||
             (data.contains("/sezon-") && data.contains("/bolum-"))
 

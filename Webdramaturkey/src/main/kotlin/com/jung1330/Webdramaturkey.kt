@@ -11,6 +11,7 @@ import org.jsoup.nodes.Element
 
 class Webdramaturkey : MainAPI() {
     override var mainUrl = "https://webdramaturkey2.com"
+    private val initialMainUrl = mainUrl
     override var name = "WebDramaTurkey"
     override val hasMainPage = true
     override var lang = "tr"
@@ -33,6 +34,8 @@ class Webdramaturkey : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Webdramaturkey")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val separator = if (request.data.contains("?")) "&" else "?"
         val targetUrl = if (page <= 1) request.data else "${request.data}${separator}page=$page"
         val document = app.get(targetUrl).document
@@ -87,12 +90,15 @@ class Webdramaturkey : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Webdramaturkey")
         val encoded = java.net.URLEncoder.encode(query.trim(), "UTF-8").replace("+", "%20")
         val document = app.get("$mainUrl/arama/$encoded").document
         return parseCatalogItems(document)
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Webdramaturkey")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val cleanUrl = url.replace(Regex("""/(dizi|anime)/([^/?#]+)/\d+-sezon/\d+-bolum.*"""), "/$1/$2")
         val document = app.get(cleanUrl).document
 
@@ -178,6 +184,8 @@ class Webdramaturkey : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Webdramaturkey")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val document = app.get(data).document
         val embedButtons = document.select("button.btn-service[data-embed], a.btn-service[data-embed]")
         val seenEmbedIds = LinkedHashSet<String>()

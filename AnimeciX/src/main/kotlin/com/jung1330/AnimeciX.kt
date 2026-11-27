@@ -15,6 +15,7 @@ import javax.crypto.spec.SecretKeySpec
 
 class AnimeciX : MainAPI() {
     override var mainUrl              = "https://animecix.tv"
+    private val initialMainUrl = mainUrl
     override var name                 = "AnimeciX"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -60,6 +61,8 @@ class AnimeciX : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "AnimeciX")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val fullUrl = "${request.data}&page=${page}&perPage=16"
         val query = fullUrl.substringAfter("?", "")
         val response = app.get(
@@ -81,6 +84,7 @@ class AnimeciX : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "AnimeciX")
         val fullUrl = "${mainUrl}/secure/search/${query}?limit=20"
         val response = app.get(
             fullUrl,
@@ -101,6 +105,8 @@ class AnimeciX : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "AnimeciX")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val titleId = url.substringAfter("?titleId=")
         val response = app.get(
             url,
@@ -160,6 +166,8 @@ class AnimeciX : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        DomainConfig.sync(this, "AnimeciX")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         Log.d("ACX", "data » $data")
         val rawCandidates = data.split("|").map { it.trim() }.filter { it.isNotEmpty() }
         val embedUrls = linkedSetOf<String>()

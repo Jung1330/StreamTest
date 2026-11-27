@@ -12,6 +12,7 @@ import java.net.URLEncoder
 
 class Dramadunyam : MainAPI() {
     override var mainUrl              = "https://dramadunyam.com"
+    private val initialMainUrl = mainUrl
     override var name                 = "DramaDünyam"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -77,6 +78,8 @@ class Dramadunyam : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Dramadunyam")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val obj = apiGetJson("${request.data}$page")
         val arr = obj?.optJSONArray("items") ?: obj?.optJSONArray("data")
         val items = parseItems(arr)
@@ -86,6 +89,7 @@ class Dramadunyam : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Dramadunyam")
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
         val encoded = URLEncoder.encode(trimmed, "UTF-8")
@@ -96,6 +100,8 @@ class Dramadunyam : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Dramadunyam")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val slug = url.substringAfter("/dizi/").substringBefore("/").substringBefore("?").trim()
         if (slug.isBlank()) return null
 
@@ -137,6 +143,8 @@ class Dramadunyam : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Dramadunyam")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         var obj: JSONObject? = null
         for (attempt in 0 until 5) {
             obj = apiGetJson(

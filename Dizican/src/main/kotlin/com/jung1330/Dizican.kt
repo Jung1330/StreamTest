@@ -12,6 +12,7 @@ import java.net.URLEncoder
 
 class Dizican : MainAPI() {
     override var mainUrl              = "https://dizican.cc"
+    private val initialMainUrl = mainUrl
     override var name                 = "DiziCaN"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -133,6 +134,8 @@ class Dizican : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Dizican")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val pageUrl = if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/"
         val doc = app.get(pageUrl).document
         val items = parseCards(doc)
@@ -140,6 +143,7 @@ class Dizican : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Dizican")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = try {
             app.get("$mainUrl/?s=$encoded").document
@@ -151,6 +155,8 @@ class Dizican : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Dizican")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val rawTitle = doc.selectFirst("h1.film, h1")?.text()?.trim()
@@ -381,6 +387,8 @@ class Dizican : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Dizican")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val mainDoc = try {
             app.get(data).document
         } catch (t: Throwable) {

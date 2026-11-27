@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element
 
 class Dizipal : MainAPI() {
     override var mainUrl = "https://ddizipal.live"
+    private val initialMainUrl = mainUrl
     override var name = "DiziPAL"
     override val hasMainPage = true
     override var lang = "tr"
@@ -38,6 +39,8 @@ class Dizipal : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Dizipal")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val separator = if (request.data.contains("?")) "&" else "?"
         val targetUrl = if (page <= 1) request.data else "${request.data}${separator}page=$page"
         val document = app.get(targetUrl).document
@@ -95,12 +98,15 @@ class Dizipal : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Dizipal")
         val encoded = java.net.URLEncoder.encode(query.trim(), "UTF-8")
         val document = app.get("$mainUrl/ara?q=$encoded").document
         return parseCatalogCards(document)
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Dizipal")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val cleanUrl = url
             .replace(Regex("""/(dizi|anime)/([^/?#]+)/sezon-\d+/bolum-\d+.*"""), "/$1/$2")
             .replace(Regex("""/film/([^/?#]+)/izle.*"""), "/film/$1")
@@ -236,6 +242,8 @@ class Dizipal : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Dizipal")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val pageHtml = app.get(data).text
         var foundAny = false
 

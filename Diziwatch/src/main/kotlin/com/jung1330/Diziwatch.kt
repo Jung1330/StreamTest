@@ -11,6 +11,7 @@ import java.net.URLEncoder
 
 class Diziwatch : MainAPI() {
     override var mainUrl              = "https://diziwatch.org"
+    private val initialMainUrl = mainUrl
     override var name                 = "Diziwatch"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -26,6 +27,8 @@ class Diziwatch : MainAPI() {
     private val episodeRegex = Regex("""sezon-(\d+)/bolum-(\d+)""")
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Diziwatch")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val doc  = app.get("${request.data}$page").document
         val seen = mutableSetOf<String>()
         val home = mutableListOf<SearchResponse>()
@@ -58,6 +61,7 @@ class Diziwatch : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Diziwatch")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val text = try {
             app.get("${mainUrl}/api/ara?q=$encoded").text
@@ -86,6 +90,8 @@ class Diziwatch : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Diziwatch")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val rawTitle = doc.selectFirst("meta[property='og:title']")?.attr("content")
@@ -181,6 +187,8 @@ class Diziwatch : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        DomainConfig.sync(this, "Diziwatch")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val html = try {
             app.get(data).text
         } catch (t: Throwable) {

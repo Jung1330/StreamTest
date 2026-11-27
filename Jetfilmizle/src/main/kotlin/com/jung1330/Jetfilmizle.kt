@@ -14,6 +14,7 @@ import java.net.URLEncoder
 
 class Jetfilmizle : MainAPI() {
     override var mainUrl              = "https://jetfilmizle.app"
+    private val initialMainUrl = mainUrl
     override var name                 = "JetFilmizle"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -88,12 +89,15 @@ class Jetfilmizle : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Jetfilmizle")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val pageUrl = if (page <= 1) request.data else "${request.data.trimEnd('/')}/sayfa-$page"
         val doc = app.get(pageUrl).document
         return newHomePageResponse(request.name, parseCards(doc))
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Jetfilmizle")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = try {
             app.get("$mainUrl/arama?q=$encoded").document
@@ -114,6 +118,8 @@ class Jetfilmizle : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Jetfilmizle")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val rawTitle = doc.selectFirst("meta[property='og:title']")?.attr("content")?.trim()
@@ -687,6 +693,8 @@ class Jetfilmizle : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Jetfilmizle")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val parsed = runCatching { JSONObject(data) }.getOrNull()
         val pageUrl = parsed?.optString("url")?.ifBlank { null } ?: data
         val sourcesJson = parsed?.optJSONArray("sources")

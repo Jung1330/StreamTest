@@ -14,6 +14,7 @@ import java.net.URLEncoder
 
 class Hdfilmcehennemi : MainAPI() {
     override var mainUrl              = "https://www.hdfilmcehennemi.nl"
+    private val initialMainUrl = mainUrl
     override var name                 = "HDFilmCehennemi"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -26,10 +27,10 @@ class Hdfilmcehennemi : MainAPI() {
         "$mainUrl/serifilmlerim-8/"      to "Seri Filmler"
     )
 
-    private val filmRegex        = Regex("""^https://www\.hdfilmcehennemi\.nl/[a-z0-9\-]+/?$""")
-    private val seriesRegex      = Regex("""^https://www\.hdfilmcehennemi\.nl/dizi/([^/]+)/?$""")
-    private val episodeUrlRegex  = Regex("""^https://www\.hdfilmcehennemi\.nl/dizi/([^/]+)/sezon-\d+/bolum-\d+[^/]*/?$""")
-    private val seriFilmRegex    = Regex("""^https://www\.hdfilmcehennemi\.nl/serifilmlerim-\d+/[^/]+/?$""")
+    private val filmRegex        = Regex("""^https?://[^/]+/[a-z0-9\-]+/?$""")
+    private val seriesRegex      = Regex("""^https?://[^/]+/dizi/([^/]+)/?$""")
+    private val episodeUrlRegex  = Regex("""^https?://[^/]+/dizi/([^/]+)/sezon-\d+/bolum-\d+[^/]*/?$""")
+    private val seriFilmRegex    = Regex("""^https?://[^/]+/serifilmlerim-\d+/[^/]+/?$""")
     private val packedRegex      = Regex("""(?s)eval\(function\(p,a,c,k,e,[dr]\)\{.*?\}\s*\('.*?',\s*\d+,\s*\d+,\s*'.*?'\.split\('\|'\)\s*(?:,\s*0\s*,\s*\{\s*\}\s*)?\)\)""")
     private val payloadCallRegex = Regex("""\("([^"]{20,})"\.split\("([^"]+)"\)\)""")
     private val directFileRegex  = Regex(""""?file"?\s*:\s*"(https?://[^"]+(?:\.m3u8|master\.txt)[^"]*)"""")
@@ -49,6 +50,8 @@ class Hdfilmcehennemi : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Hdfilmcehennemi")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         if (page > 1) return newHomePageResponse(request.name, emptyList())
         val doc = app.get(request.data).document
 
@@ -95,6 +98,7 @@ class Hdfilmcehennemi : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Hdfilmcehennemi")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
 
         // Sitenin kendi JSON arama servisi (X-Requested-With: fetch başlığı gerekli)
@@ -137,7 +141,8 @@ class Hdfilmcehennemi : MainAPI() {
 
     /** Arama servisi bozulursa DuckDuckGo site aramasına düşer. */
     private suspend fun searchWithDuckDuckGo(query: String): List<SearchResponse> {
-        val q = URLEncoder.encode("site:hdfilmcehennemi.nl $query", "UTF-8")
+        val host = runCatching { URI(mainUrl).host?.removePrefix("www.") }.getOrNull() ?: "hdfilmcehennemi.nl"
+        val q = URLEncoder.encode("site:$host $query", "UTF-8")
         val doc = try {
             app.get("https://html.duckduckgo.com/html/?q=$q").document
         } catch (t: Throwable) {
@@ -166,6 +171,8 @@ class Hdfilmcehennemi : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Hdfilmcehennemi")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val rawTitle = doc.selectFirst("meta[property='og:title']")?.attr("content")
@@ -585,6 +592,8 @@ class Hdfilmcehennemi : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        DomainConfig.sync(this, "Hdfilmcehennemi")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val collected = linkedSetOf<String>()
         val isDirectEmbed = data.contains("/rplayer/", ignoreCase = true) || data.contains("/video/embed/", ignoreCase = true)
 

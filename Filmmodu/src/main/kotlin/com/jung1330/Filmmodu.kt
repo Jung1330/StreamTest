@@ -17,6 +17,7 @@ import javax.crypto.spec.SecretKeySpec
 
 class Filmmodu : MainAPI() {
     override var mainUrl = "https://filmmodu.cc"
+    private val initialMainUrl = mainUrl
     override var name = "Filmmodu"
     override val hasMainPage = true
     override var lang = "tr"
@@ -40,6 +41,8 @@ class Filmmodu : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Filmmodu")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val baseUrl = request.data.trimEnd('/')
         val targetUrl = if (page <= 1) baseUrl else "$baseUrl/$page"
         val document = app.get(targetUrl).document
@@ -121,6 +124,7 @@ class Filmmodu : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Filmmodu")
         val trimmed = query.trim()
         if (trimmed.length < 2) return emptyList()
 
@@ -181,6 +185,8 @@ class Filmmodu : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Filmmodu")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val cleanUrl = url.replace(Regex("""/dizi/([^/?#]+)/sezon-\d+/bolum-\d+.*"""), "/dizi/$1")
         val document = app.get(cleanUrl).document
 
@@ -281,6 +287,8 @@ class Filmmodu : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Filmmodu")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val pageResp = app.get(data)
         val document = pageResp.document
         val csrf = document.selectFirst("meta[name=csrf-token]")?.attr("content").orEmpty()

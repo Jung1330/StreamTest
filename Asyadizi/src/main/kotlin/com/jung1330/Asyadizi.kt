@@ -11,6 +11,7 @@ import java.net.URLEncoder
 
 class Asyadizi : MainAPI() {
     override var mainUrl              = "https://asyadizi.com"
+    private val initialMainUrl = mainUrl
     override var name                 = "AsyaDizi"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -80,6 +81,8 @@ class Asyadizi : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Asyadizi")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val url = if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/"
         val doc = app.get(url).document
         val items = parseItems(doc)
@@ -87,6 +90,7 @@ class Asyadizi : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Asyadizi")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = try {
             app.get("$mainUrl/?s=$encoded").document
@@ -98,6 +102,8 @@ class Asyadizi : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Asyadizi")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url).document
 
         val rawTitle = doc.selectFirst("h1")?.text()?.trim()
@@ -154,6 +160,8 @@ class Asyadizi : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Asyadizi")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val mainDoc = try {
             app.get(data).document
         } catch (t: Throwable) {

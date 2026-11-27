@@ -11,6 +11,7 @@ import java.security.MessageDigest
 
 class Dizilla : MainAPI() {
     override var mainUrl              = "https://dizilla.la"
+    private val initialMainUrl = mainUrl
     override var name                 = "Dizilla"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -28,6 +29,8 @@ class Dizilla : MainAPI() {
     private val gateConstRx  = Regex("""String\.fromCharCode\(([\d,\s]+)\)""")
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Dizilla")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         if (page > 1) return newHomePageResponse(request.name, emptyList())
 
         val doc = app.get(request.data).document
@@ -52,6 +55,7 @@ class Dizilla : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Dizilla")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = try {
             app.get("$mainUrl/ara?q=$encoded").document
@@ -77,6 +81,8 @@ class Dizilla : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Dizilla")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val html = app.get(url).text
 
         val doc = org.jsoup.Jsoup.parse(html)
@@ -192,6 +198,8 @@ class Dizilla : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        DomainConfig.sync(this, "Dizilla")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val pageHtml = try {
             app.get(data).text
         } catch (t: Throwable) {

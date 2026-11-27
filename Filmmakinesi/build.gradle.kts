@@ -1,4 +1,4 @@
-version = 6
+version = 7
 
 cloudstream {
     authors     = listOf("Jung1330", "StreamTest", "AI-Assistant")

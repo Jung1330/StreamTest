@@ -13,6 +13,7 @@ import java.net.URLEncoder
 
 class Fullhdfilmizlesene : MainAPI() {
     override var mainUrl              = "https://www.fullhdfilmizlesene.now"
+    private val initialMainUrl = mainUrl
     override var name                 = "FullHDFilmizlesene"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -58,6 +59,8 @@ class Fullhdfilmizlesene : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Fullhdfilmizlesene")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val url = if (page <= 1) request.data else "${request.data}/$page"
         val doc = app.get(url, referer = "$mainUrl/").document
         val items = doc.select("li.film").mapNotNull { it.toSearchResult() }
@@ -65,12 +68,15 @@ class Fullhdfilmizlesene : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Fullhdfilmizlesene")
         val encoded = URLEncoder.encode(query.trim(), "UTF-8")
         val doc = app.get("$mainUrl/arama/$encoded", referer = "$mainUrl/").document
         return doc.select("li.film").mapNotNull { it.toSearchResult() }
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Fullhdfilmizlesene")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val doc = app.get(url, referer = "$mainUrl/").document
         val title = doc.selectFirst("h1")?.text()?.trim()
             ?.replace(Regex("\\s+izle$", RegexOption.IGNORE_CASE), "")
@@ -187,6 +193,8 @@ class Fullhdfilmizlesene : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Fullhdfilmizlesene")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val html = app.get(data, referer = "$mainUrl/").text
         val scxJson = Regex("""var\s+scx\s*=\s*(\{.*?\});""", RegexOption.DOT_MATCHES_ALL)
             .find(html)?.groupValues?.get(1)

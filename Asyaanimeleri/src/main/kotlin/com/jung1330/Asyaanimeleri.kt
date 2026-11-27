@@ -11,6 +11,7 @@ import org.jsoup.nodes.Element
 
 class Asyaanimeleri : MainAPI() {
     override var mainUrl = "https://asyaanimeleri.top"
+    private val initialMainUrl = mainUrl
     override var name = "AsyaAnimeleri"
     override val hasMainPage = true
     override var lang = "tr"
@@ -29,6 +30,8 @@ class Asyaanimeleri : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Asyaanimeleri")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val separator = if (request.data.contains("?")) "&" else "?"
         val targetUrl = if (page <= 1) request.data else "${request.data}${separator}page=$page"
         val document = app.get(targetUrl).document
@@ -74,12 +77,15 @@ class Asyaanimeleri : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Asyaanimeleri")
         val encoded = java.net.URLEncoder.encode(query.trim(), "UTF-8")
         val document = app.get("$mainUrl/?s=$encoded").document
         return parseBsxCards(document)
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Asyaanimeleri")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         var document = app.get(url).document
 
         // If user clicked an episode link directly, resolve parent series page if available
@@ -156,6 +162,8 @@ class Asyaanimeleri : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Asyaanimeleri")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val document = app.get(data).document
         val seenUrls = LinkedHashSet<String>()
         var foundAny = false

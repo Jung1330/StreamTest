@@ -12,6 +12,7 @@ import java.net.URLEncoder
 
 class Shortizle : MainAPI() {
     override var mainUrl              = "https://shortizle.com"
+    private val initialMainUrl = mainUrl
     override var name                 = "Shortizle"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -81,6 +82,8 @@ class Shortizle : MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        DomainConfig.sync(this, "Shortizle")
+        val request = request.copy(data = DomainConfig.rewrite(request.data, initialMainUrl, mainUrl))
         val targetUrl = if (page <= 1) request.data else "${request.data}?page=$page"
         val doc = app.get(targetUrl).document
         val props = extractProps(doc)
@@ -93,6 +96,7 @@ class Shortizle : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun search(query: String): List<SearchResponse> {
+        DomainConfig.sync(this, "Shortizle")
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
         val encoded = URLEncoder.encode(trimmed, "UTF-8")
@@ -119,6 +123,8 @@ class Shortizle : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        DomainConfig.sync(this, "Shortizle")
+        val url = DomainConfig.rewrite(url, initialMainUrl, mainUrl)
         val cleanUrl = if (url.contains("/watch/")) {
             val slug = url.substringAfter("/watch/").substringBefore("/").substringBefore("?")
             "$mainUrl/icerik/$slug"
@@ -200,6 +206,8 @@ class Shortizle : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        DomainConfig.sync(this, "Shortizle")
+        val data = DomainConfig.rewrite(data, initialMainUrl, mainUrl)
         val pageResp = try {
             app.get(data)
         } catch (t: Throwable) {
